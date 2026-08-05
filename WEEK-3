@@ -293,3 +293,160 @@ mvn clean package
 mvn -q -DskipTests package
 
 mvn exec:java -Dexec.mainClass=com.example.CreateTopic
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+package com.example;
+
+import org.apache.kafka.clients.producer.*;
+import java.util.Properties;
+
+public class Producer {
+    public static void main(String[] args) {
+
+        Properties props = new Properties();
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092,localhost:29093");
+        props.put(ProducerConfig.ACKS_CONFIG, "all");
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                "org.apache.kafka.common.serialization.StringSerializer");
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                "org.apache.kafka.common.serialization.StringSerializer");
+
+        try (KafkaProducer<String, String> producer = new KafkaProducer<>(props)) {
+
+            for (int i = 0; i < 10; i++) {
+
+                String key = Integer.toString(i);
+                String value = "This is message " + i;
+
+                ProducerRecord<String, String> record =
+                        new ProducerRecord<>("test", key, value);
+
+                producer.send(record, (metadata, exception) -> {
+                    if (exception == null) {
+                        System.out.printf(
+                                "Produced -> topic=%s partition=%d offset=%d key=%s value=%s%n",
+                                metadata.topic(),
+                                metadata.partition(),
+                                metadata.offset(),
+                                key,
+                                value
+                        );
+                    } else {
+                        exception.printStackTrace();
+                    }
+                });
+            }
+
+            producer.flush();
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+package com.example;
+
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.StringDeserializer;
+
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Properties;
+
+public class Consumer {
+
+    public static void main(String[] args) {
+
+        Properties props = new Properties();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092,localhost:29093");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "demo-group");
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                StringDeserializer.class.getName());
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                StringDeserializer.class.getName());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+
+        consumer.subscribe(Collections.singletonList("test"));
+
+        System.out.println("Consumer started...");
+
+        while (true) {
+            ConsumerRecords<String, String> records =
+                    consumer.poll(Duration.ofMillis(1000));
+
+            for (ConsumerRecord<String, String> record : records) {
+                System.out.printf(
+                        "Received -> key=%s value=%s partition=%d offset=%d%n",
+                        record.key(),
+                        record.value(),
+                        record.partition(),
+                        record.offset()
+                );
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+package com.example;
+
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.NewTopic;
+
+import java.util.Collections;
+import java.util.Properties;
+
+public class CreateTopic {
+
+    public static void main(String[] args) throws Exception {
+
+        Properties props = new Properties();
+        props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
+                "localhost:29092,localhost:29093");
+
+        try (AdminClient admin = AdminClient.create(props)) {
+
+            NewTopic topic = new NewTopic("test", 3, (short) 2);
+
+            admin.createTopics(Collections.singleton(topic)).all().get();
+
+            System.out.println("Topic 'test' created successfully.");
+        }
+    }
+}
