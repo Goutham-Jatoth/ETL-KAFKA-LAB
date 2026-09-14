@@ -1,0 +1,353 @@
+WEEK–1: Install Apache Kafka on a Single Node
+Aim
+
+To install and run Apache Kafka on a single node using Docker.
+
+Requirements
+Ubuntu
+Docker installed and running
+Internet connection
+STEP 1: Check Docker
+
+Open Terminal and type:
+
+docker --version
+
+You should get something like:
+
+Docker version 28.x.x
+
+If Docker is not installed, install it first.
+
+Also check:
+
+sudo systemctl start docker
+
+Then:
+
+sudo systemctl status docker
+
+You should see:
+
+active (running)
+STEP 2: Download Zookeeper Image
+
+Kafka in your lab material uses Zookeeper.
+
+Run:
+
+docker pull wurstmeister/zookeeper
+
+Wait until the download finishes.
+
+You should see something similar to:
+
+Status: Downloaded newer image for wurstmeister/zookeeper
+STEP 3: Download Kafka Image
+
+Run:
+
+docker pull wurstmeister/kafka
+
+Again, wait until it finishes.
+
+These are the two images specified in your Week-1 material.
+
+STEP 4: Start Zookeeper
+
+Run:
+
+docker run -d --name zookeeper -p 2181:2181 wurstmeister/zookeeper
+What this does
+docker run → creates and starts container
+-d → runs in background
+--name zookeeper → gives container the name zookeeper
+-p 2181:2181 → exposes Zookeeper port
+
+Check it:
+
+docker ps
+
+You should see zookeeper running.
+
+STEP 5: Start Kafka
+
+Now run this as one command:
+
+docker run -d --name kafka -p 9092:9092 --link zookeeper:zookeeper -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 wurstmeister/kafka
+
+This is the Kafka command given in your Week-1 material.
+
+Important
+
+If the long command is difficult to type, use the same command in multiple lines:
+
+docker run -d --name kafka -p 9092:9092 --link zookeeper:zookeeper \
+-e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
+-e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
+-e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
+wurstmeister/kafka
+
+Do not remove the \ characters when using multiple lines.
+
+STEP 6: Check Both Containers
+
+Run:
+
+docker ps
+
+You should see something like:
+
+CONTAINER ID   IMAGE                 NAMES
+xxxxxx         wurstmeister/kafka   kafka
+xxxxxx         wurstmeister/...     zookeeper
+
+If both kafka and zookeeper are listed, your Week-1 setup is running. ✅
+
+STEP 7: Check Kafka Logs
+
+To make sure Kafka started correctly:
+
+docker logs kafka
+
+You will get many lines.
+
+If you want to see only the latest logs:
+
+docker logs --tail 20 kafka
+
+If there is no continuous error, Kafka is generally running.
+
+⭐ VERY IMPORTANT FOR LAB EXAM
+
+You can remember Week-1 as only 4 main commands:
+
+1. Pull Zookeeper
+docker pull wurstmeister/zookeeper
+2. Pull Kafka
+docker pull wurstmeister/kafka
+3. Run Zookeeper
+docker run -d --name zookeeper -p 2181:2181 wurstmeister/zookeeper
+4. Run Kafka
+docker run -d --name kafka -p 9092:9092 --link zookeeper:zookeeper -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 wurstmeister/kafka
+
+Then:
+
+docker ps
+
+If both containers are running → Week-1 completed. ✅
+
+⚠️ If You Get "Container Name Already in Use"
+
+This can happen if you already ran the commands once.
+
+Check:
+
+docker ps -a
+
+If kafka or zookeeper already exists, remove them:
+
+docker rm -f kafka zookeeper
+
+Then start again from STEP 3.
+
+⚠️ If You Get "Cannot Connect to Docker Daemon"
+
+Run:
+
+sudo systemctl start docker
+
+Then retry the commands.
+
+📝 What to Write in Lab Record
+
+Aim:
+To install Apache Kafka on a single node using Docker.
+
+Procedure:
+
+Pull Zookeeper Docker image.
+Pull Kafka Docker image.
+Start Zookeeper container.
+Start Kafka container.
+Verify the running containers using docker ps.
+
+Result:
+Apache Kafka was successfully installed and executed on a single node using Docker.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+WEEK-1 ETL-KAFKA VIVA QUESTIONS
+🔹 Basic Kafka Questions
+
+1. What is Apache Kafka?
+Apache Kafka is a distributed system used to send, receive, and store streams of messages/events.
+
+2. What is Kafka mainly used for?
+Kafka is mainly used for real-time data streaming and communication between applications.
+
+3. What is a message in Kafka?
+A message is a piece of data or event sent through Kafka.
+
+4. What is a Kafka topic?
+A topic is a named place where Kafka stores messages/events.
+
+5. What is a Kafka broker?
+A broker is a Kafka server that receives, stores, and delivers messages.
+
+6. What is a Kafka cluster?
+A Kafka cluster is a group of Kafka brokers working together.
+
+7. What is a single-node Kafka cluster?
+It is a Kafka setup where only one Kafka server/broker is running.
+
+8. What is Apache ZooKeeper?
+ZooKeeper is a coordination service used by older Kafka deployments to manage Kafka components.
+
+9. Why is ZooKeeper used in your Week-1 setup?
+It is used because the Wurstmeister Kafka image in the lab setup connects Kafka to ZooKeeper.
+
+🔹 Docker Questions
+
+10. What is Docker?
+Docker is a platform used to run applications inside isolated containers.
+
+11. What is a Docker image?
+A Docker image is a package containing everything required to create and run a container.
+
+12. What is a Docker container?
+A container is a running instance of a Docker image.
+
+13. Why do we use Docker for Kafka?
+Docker makes Kafka easy to install, run, and manage without manually installing all dependencies.
+
+14. What does docker pull do?
+docker pull downloads an image from a Docker registry.
+
+15. What does docker run do?
+docker run creates and starts a container from an image.
+
+16. What does docker ps do?
+docker ps shows the currently running Docker containers.
+
+17. What does docker ps -a do?
+It shows all containers, including stopped containers.
+
+18. What does docker logs kafka do?
+It displays the logs generated by the Kafka container.
+
+19. What does docker rm do?
+It removes a Docker container.
+
+20. What does docker rm -f do?
+It forcefully stops and removes a container.
+
+🔹 Commands Used in Week-1
+
+21. Why do we use docker pull wurstmeister/zookeeper?
+It downloads the Wurstmeister ZooKeeper image.
+
+22. Why do we use docker pull wurstmeister/kafka?
+It downloads the Wurstmeister Kafka image.
+
+23. What does --name zookeeper mean?
+It assigns the container the name zookeeper.
+
+24. What does --name kafka mean?
+It assigns the container the name kafka.
+
+25. What does -d mean in Docker?
+-d runs the container in detached/background mode.
+
+26. What does -p 2181:2181 mean?
+It maps host port 2181 to container port 2181.
+
+27. What does -p 9092:9092 mean?
+It maps host port 9092 to Kafka's container port 9092.
+
+28. What is port 2181 used for?
+Port 2181 is used by ZooKeeper in this setup.
+
+29. What is port 9092 used for?
+Port 9092 is used by Kafka for client/broker communication in this setup.
+
+30. What does --link zookeeper:zookeeper do?
+It allows the Kafka container to connect to the ZooKeeper container using the name zookeeper.
+
+🔹 Kafka Configuration Questions
+
+31. What is KAFKA_ZOOKEEPER_CONNECT?
+It specifies the ZooKeeper address that Kafka should connect to.
+
+32. What is the value of KAFKA_ZOOKEEPER_CONNECT in Week-1?
+The value is zookeeper:2181.
+
+33. What is KAFKA_ADVERTISED_LISTENERS?
+It tells Kafka how clients should connect to the Kafka broker.
+
+34. What is its value in Week-1?
+It is PLAINTEXT://localhost:9092.
+
+35. What is KAFKA_LISTENERS?
+It specifies the network address on which Kafka listens for connections.
+
+36. What is its value in Week-1?
+It is PLAINTEXT://0.0.0.0:9092.
+
+37. What does PLAINTEXT mean?
+PLAINTEXT means the Kafka connection is not encrypted.
+
+38. What does localhost mean?
+localhost refers to the local machine.
+
+39. What does 0.0.0.0 mean in the listener configuration?
+It means Kafka listens on all available network interfaces.
+
+🔹 ZooKeeper + Kafka Questions
+
+40. Which one should be started first, Kafka or ZooKeeper?
+In this Week-1 setup, ZooKeeper is started first, then Kafka.
+
+41. Why should ZooKeeper be started before Kafka?
+Because Kafka needs to connect to ZooKeeper during startup in this setup.
+
+42. What happens if ZooKeeper is not running?
+Kafka may fail to connect and may not start correctly.
+
+43. How can you check whether ZooKeeper is running?
+Use docker ps and look for the zookeeper container.
+
+44. How can you check whether Kafka is running?
+Use docker ps and look for the kafka container.
+
+45. How do you check both Kafka and ZooKeeper together?
+Run docker ps.
+
+🔹 Important Troubleshooting Viva
+
+46. What if Docker is not running?
+Start Docker using sudo systemctl start docker.
+
+47. What if you get "container name already in use"?
+Remove the existing container using docker rm -f kafka zookeeper and run it again.
+
+48. How do you see stopped containers?
+Use docker ps -a.
+
+49. How do you see Kafka errors?
+Use docker logs kafka.
+
+50. How do you see only the latest Kafka logs?
+Use docker logs --tail 20 kafka.
