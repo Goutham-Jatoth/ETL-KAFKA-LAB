@@ -1,0 +1,31 @@
+Week–1: Install Apache Kafka on a Single Node
+
+For your Lab Internal Exam, you can write the following short and easy version. It is directly based on the Week-1 material in your file.
+
+Aim
+
+To install Apache Kafka on a single node using Docker.
+
+Commands
+docker pull wurstmeister/zookeeper
+docker pull wurstmeister/kafka
+Start Zookeeper
+docker run -d --name zookeeper -p 2181:2181 wurstmeister/zookeeper
+Start Kafka
+docker run -d --name kafka -p 9092:9092 --link zookeeper:zookeeper \
+-e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
+-e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
+-e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
+wurstmeister/kafka
+Result
+
+Apache Kafka was successfully installed and started on a single node using Docker.
+
+🧠 Easy order to remember
+
+Pull → Zookeeper → Kafka
+
+1. docker pull Zookeeper
+2. docker pull Kafka
+3. Run Zookeeper
+4. Run Kafka
