@@ -1,0 +1,85 @@
+WEEK–4 — Kafka Producer & Consumer in Java
+Aim
+
+To create a Kafka topic, produce a message and consume it.
+
+Step 1: Start Kafka
+docker compose up -d
+Step 2: KafkaTopicCreator.java
+package com.example.kafka;
+import org.apache.kafka.clients.admin.*;
+import java.util.*;
+
+class KafkaTopicCreator {
+ public static void main(String[] a)throws Exception{
+  Properties p=new Properties();
+  p.put("bootstrap.servers","localhost:9092");
+  AdminClient c=AdminClient.create(p);
+  c.createTopics(Collections.singleton(
+   new NewTopic("test-topic",1,(short)1))).all().get();
+  System.out.println("Topic created");
+  c.close();
+ }
+}
+Step 3: KafkaProducerExample.java
+package com.example.kafka;
+import org.apache.kafka.clients.producer.*;
+import java.util.*;
+
+class KafkaProducerExample {
+ public static void main(String[] a)throws Exception{
+  Properties p=new Properties();
+  p.put("bootstrap.servers","localhost:9092");
+  p.put("key.serializer","org.apache.kafka.common.serialization.StringSerializer");
+  p.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
+
+  KafkaProducer<String,String> k=new KafkaProducer<>(p);
+  k.send(new ProducerRecord<>("test-topic","Hello Kafka")).get();
+  System.out.println("Message sent");
+  k.close();
+ }
+}
+Step 4: KafkaConsumerExample.java
+package com.example.kafka;
+import org.apache.kafka.clients.consumer.*;
+import java.time.Duration;
+import java.util.*;
+
+class KafkaConsumerExample {
+ public static void main(String[] a){
+  Properties p=new Properties();
+  p.put("bootstrap.servers","localhost:9092");
+  p.put("group.id","test-group");
+  p.put("key.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
+  p.put("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
+
+  KafkaConsumer<String,String> c=new KafkaConsumer<>(p);
+  c.subscribe(Collections.singletonList("test-topic"));
+
+  while(true)
+   for(ConsumerRecord<String,String> r:c.poll(Duration.ofMillis(1000)))
+    System.out.println(r.value());
+ }
+}
+Step 5: Compile
+javac -cp "lib/*" -d out src/main/java/com/example/kafka/*.java
+
+Step 6: Run
+
+Terminal 1
+
+java -cp "out:lib/*" com.example.kafka.KafkaTopicCreator
+
+Terminal 2
+
+java -cp "out:lib/*" com.example.kafka.KafkaConsumerExample
+
+Terminal 3
+
+java -cp "out:lib/*" com.example.kafka.KafkaProducerExample
+
+Output:
+
+Topic created
+Message sent
+Hello Kafka
