@@ -1,0 +1,317 @@
+WEEK–2: Single-Node, Single-Broker Kafka Cluster
+Aim
+
+To set up a single-node, single-broker Kafka cluster and perform basic Kafka operations such as:
+
+Creating a topic
+Describing a topic
+Producing messages
+Consuming messages
+Saving consumed messages into a file
+PART 1 — Start Docker
+
+Open Terminal 1.
+
+Step 1: Check Docker
+docker --version
+
+You should get something like:
+
+Docker version ...
+
+If Docker is not running:
+
+sudo systemctl start docker
+PART 2 — Download Kafka and ZooKeeper Images
+
+According to the PDF, use the following Docker images.
+
+Step 2: Download ZooKeeper
+docker pull wurstmeister/zookeeper
+
+Wait until the download completes.
+
+Step 3: Download Kafka
+docker pull wurstmeister/kafka
+
+Now both required images are available.
+
+PART 3 — Run ZooKeeper
+Step 4: Start ZooKeeper
+docker run -d --name zookeeper -p 2181:2181 wurstmeister/zookeeper
+What this does
+docker run → creates and runs a container
+-d → runs in background
+--name zookeeper → gives container the name zookeeper
+-p 2181:2181 → maps ZooKeeper port
+wurstmeister/zookeeper → ZooKeeper image
+
+ZooKeeper uses port 2181.
+
+PART 4 — Run Kafka Broker
+Step 5: Start Kafka
+
+Run:
+
+docker run -d --name kafka -p 9092:9092 --link zookeeper:zookeeper \
+-e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
+-e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
+-e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
+wurstmeister/kafka
+Important
+
+If the command appears on multiple lines, enter it exactly as shown.
+
+Kafka uses:
+
+9092
+
+as its port.
+
+PART 5 — Check Kafka and ZooKeeper
+Step 6: Check running containers
+docker ps
+
+You should see something similar to:
+
+zookeeper
+kafka
+
+Both should be running.
+
+Step 7: Check Kafka logs
+docker logs kafka
+
+If Kafka has started successfully, you should see Kafka startup-related messages.
+
+PART 6 — Generate Kafka Cluster ID
+
+The PDF then gives the Kafka storage commands.
+
+First enter the Kafka container:
+
+docker exec -it kafka bash
+
+Now you are inside the Kafka container.
+
+Step 8: Generate Cluster ID
+KAFKA_CLUSTER_ID="$(bin/kafka-storage.sh random-uuid)"
+
+This generates a random Kafka cluster ID and stores it in:
+
+KAFKA_CLUSTER_ID
+PART 7 — Format Kafka Storage
+Step 9: Format the Kafka log directories
+bin/kafka-storage.sh format --standalone -t $KAFKA_CLUSTER_ID -c config/server.properties
+
+This formats the Kafka storage using the generated cluster ID.
+
+PART 8 — Start Kafka Server
+Step 10: Start Kafka server
+bin/kafka-server-start.sh config/server.properties
+
+Kafka server will start.
+
+Note: This command normally keeps the terminal occupied while Kafka is running. If you need another terminal for the next operations, open Terminal 2.
+
+The PDF also includes an Apache Kafka 4.0.0 Docker option:
+
+docker pull apache/kafka:4.0.0
+
+and:
+
+docker run -p 9092:9092 apache/kafka:4.0.0
+
+It also mentions the native image:
+
+apache/kafka-native:4.0.0
+
+For your lab, don't mix this with the Wurstmeister setup unless your faculty specifically asks for Kafka 4.0.0. The PDF contains both sections.
+
+PART 9 — Create Kafka Topic
+
+Now create the topic mentioned in the PDF.
+
+The topic is:
+
+quickstart-events
+Step 11: Create topic
+bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
+
+Expected output is similar to:
+
+Created topic quickstart-events.
+
+This creates a Kafka topic called quickstart-events.
+
+PART 10 — Describe the Topic
+Step 12: Describe topic
+bin/kafka-topics.sh --describe --topic quickstart-events --bootstrap-server localhost:9092
+
+You may get output similar to:
+
+Topic: quickstart-events
+PartitionCount: 1
+ReplicationFactor: 1
+Partition: 0
+Leader: 0
+Replicas: 0
+Isr: 0
+Meaning
+Term	Meaning
+Topic	Name of the topic
+PartitionCount	Number of partitions
+ReplicationFactor	Number of copies
+Leader	Broker handling the partition
+Replicas	Brokers containing the partition
+ISR	In-Sync Replicas
+
+Because this is a single-node/single-broker setup, the replication factor is 1.
+
+PART 11 — Start Kafka Producer
+
+The producer is used to send messages to Kafka.
+
+Step 13: Start producer
+bin/kafka-console-producer.sh --topic quickstart-events --bootstrap-server localhost:9092
+
+After running this command, type messages.
+
+For example:
+
+This is my first event
+
+Press Enter.
+
+Then:
+
+This is my second event
+
+Press Enter.
+
+These messages are sent to:
+
+quickstart-events
+
+PART 12 — Start Kafka Consumer
+
+Now open Terminal 2.
+
+Enter the Kafka container if required:
+
+docker exec -it kafka bash
+Step 14: Start consumer
+bin/kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server localhost:9092
+
+The consumer reads the messages from the topic.
+
+You should see:
+
+This is my first event
+This is my second event
+
+The important option is:
+
+--from-beginning
+
+It tells Kafka to read the available messages from the beginning.
+
+PART 13 — Stop Consumer
+
+When you have verified the messages, press:
+
+Ctrl + C
+
+This stops the consumer.
+
+PART 14 — Kafka Connect Section
+
+Your PDF also contains a Kafka Connect section.
+
+Kafka Connect is used to connect Kafka with external systems such as files and databases.
+
+Step 15: Configure plugin path
+
+Inside the Kafka directory, run:
+
+echo "plugin.path=libs/connect-file-4.0.0.jar" >> config/connect-standalone.properties
+
+This adds the file connector plugin path to:
+
+connect-standalone.properties
+
+PART 15 — Create test.txt
+Step 16: Create a test file
+echo -e "foo\nbar" > test.txt
+
+This creates:
+
+test.txt
+
+with:
+
+foo
+bar
+PART 16 — Work With test-topic
+
+The PDF then demonstrates another topic:
+
+test-topic
+Step 17: Start producer
+bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test-topic
+
+Notice: Here we are using the PDF's exact --broker-list command.
+
+Type:
+
+Hello
+
+Press Enter.
+
+Then:
+
+Kafka Test Message
+
+Press Enter.
+
+PART 17 — Consume and Save Messages to File
+Step 18: Start consumer
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 \
+--topic test-topic --from-beginning > test.sink.txt
+
+This consumes the messages and redirects the output into:
+
+test.sink.txt
+
+So instead of simply displaying the messages on screen, they are saved in a file.
+
+PART 18 — Display the Saved File
+Step 19: Use cat
+cat test.sink.txt
+
+Expected output:
+
+Hello
+Kafka Test Message
+
+This confirms that the Kafka messages were successfully consumed and stored in the file.
+
+PART 19 — Optional tee Method
+
+The PDF also gives an alternative using tee.
+
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 \
+--topic test-topic --from-beginning | tee test.sink.txt
+Difference
+
+>:
+
+> test.sink.txt
+
+saves the output to the file.
+
+tee:
+
+| tee test.sink.txt
+
+displays the output on the screen and also saves it to the file.
