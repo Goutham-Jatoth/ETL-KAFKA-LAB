@@ -1,0 +1,37 @@
+Week–2: Single-Node Kafka Operations
+
+Aim: To create a Kafka topic and perform basic producer and consumer operations.
+
+1. Start Kafka
+docker run -d --name zookeeper -p 2181:2181 wurstmeister/zookeeper
+
+docker run -d --name kafka -p 9092:9092 --link zookeeper:zookeeper \
+-e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
+-e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
+-e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
+wurstmeister/kafka
+2. Create Topic
+bin/kafka-topics.sh --create --topic test-topic \
+--bootstrap-server localhost:9092
+3. Produce Messages
+bin/kafka-console-producer.sh --topic test-topic \
+--bootstrap-server localhost:9092
+
+Enter:
+
+Hello
+Kafka Test
+4. Consume Messages
+
+Open another terminal:
+
+bin/kafka-console-consumer.sh --topic test-topic \
+--from-beginning --bootstrap-server localhost:9092
+
+Output:
+
+Hello
+Kafka Test
+Result
+
+Thus, Kafka topic was created and messages were successfully produced and consumed.
