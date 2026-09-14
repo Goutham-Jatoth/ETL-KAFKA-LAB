@@ -1,1 +1,483 @@
+WEEK–1: Install Apache Kafka on Single Node
+        ┌─────────────┐
+        │    START    │
+        └──────┬──────┘
+               ↓
+     ┌───────────────────┐
+     │ Install Docker    │
+     └────────┬──────────┘
+              ↓
+     ┌───────────────────┐
+     │ Pull Kafka Image  │
+     │ & Zookeeper Image │
+     └────────┬──────────┘
+              ↓
+     ┌───────────────────┐
+     │ Start Zookeeper   │
+     └────────┬──────────┘
+              ↓
+     ┌───────────────────┐
+     │ Start Kafka       │
+     │ Broker            │
+     └────────┬──────────┘
+              ↓
+        ┌─────────────┐
+        │ Kafka Ready │
+        └──────┬──────┘
+               ↓
+        ┌─────────────┐
+        │     END     │
+        └─────────────┘
+WEEK–2: Basic Kafka Operations
+        ┌─────────────┐
+        │    START    │
+        └──────┬──────┘
+               ↓
+     ┌──────────────────┐
+     │ Start Kafka      │
+     │ & Zookeeper      │
+     └────────┬─────────┘
+              ↓
+     ┌──────────────────┐
+     │ Create Topic     │
+     └────────┬─────────┘
+              ↓
+     ┌──────────────────┐
+     │ Describe Topic   │
+     └────────┬─────────┘
+              ↓
+     ┌──────────────────┐
+     │ Start Producer   │
+     └────────┬─────────┘
+              ↓
+     ┌──────────────────┐
+     │ Send Messages    │
+     └────────┬─────────┘
+              ↓
+     ┌──────────────────┐
+     │ Start Consumer   │
+     └────────┬─────────┘
+              ↓
+     ┌──────────────────┐
+     │ Receive Messages │
+     └────────┬─────────┘
+              ↓
+        ┌─────────────┐
+        │     END     │
+        └─────────────┘
 
+Easy memory:
+Create → Describe → Produce → Consume
+
+WEEK–3: Multiple Kafka Brokers on Single Node
+              ┌─────────────┐
+              │    START    │
+              └──────┬──────┘
+                     ↓
+           ┌─────────────────┐
+           │ Start Zookeeper │
+           └────────┬────────┘
+                    ↓
+          ┌───────────────────┐
+          │ Start Kafka Broker│
+          │       1           │
+          └─────────┬─────────┘
+                    ↓
+          ┌───────────────────┐
+          │ Start Kafka Broker│
+          │       2           │
+          └─────────┬─────────┘
+                    ↓
+          ┌───────────────────┐
+          │ Create Topic      │
+          │ 3 Partitions      │
+          │ Replication = 2   │
+          └─────────┬─────────┘
+                    ↓
+          ┌───────────────────┐
+          │ Run Producer      │
+          └─────────┬─────────┘
+                    ↓
+          ┌───────────────────┐
+          │ Send Messages     │
+          └─────────┬─────────┘
+                    ↓
+          ┌───────────────────┐
+          │ Run Consumer      │
+          └─────────┬─────────┘
+                    ↓
+          ┌───────────────────┐
+          │ Receive Messages  │
+          └─────────┬─────────┘
+                    ↓
+              ┌───────────┐
+              │    END    │
+              └───────────┘
+
+Easy memory:
+Broker 1 + Broker 2 → Topic → Producer → Consumer
+
+WEEK–4: Kafka Producer & Consumer in Java
+        ┌─────────────┐
+        │    START    │
+        └──────┬──────┘
+               ↓
+     ┌──────────────────┐
+     │ Start Kafka      │
+     └────────┬─────────┘
+              ↓
+     ┌──────────────────┐
+     │ Create Topic     │
+     │ using Java       │
+     └────────┬─────────┘
+              ↓
+     ┌──────────────────┐
+     │ Start Consumer   │
+     └────────┬─────────┘
+              ↓
+     ┌──────────────────┐
+     │ Start Producer   │
+     └────────┬─────────┘
+              ↓
+     ┌──────────────────┐
+     │ Send "Hello      │
+     │ Kafka" Message   │
+     └────────┬─────────┘
+              ↓
+     ┌──────────────────┐
+     │ Consumer Receives│
+     │ Message          │
+     └────────┬─────────┘
+              ↓
+        ┌─────────────┐
+        │     END     │
+        └─────────────┘
+
+Easy memory:
+Create Topic → Consumer → Producer → Message → Receive
+
+WEEK–5: Synchronous & Asynchronous Producer
+
+Week-5 specifically demonstrates asynchronous and synchronous message sending.
+
+             ┌─────────────┐
+             │    START    │
+             └──────┬──────┘
+                    ↓
+          ┌──────────────────┐
+          │ Start Kafka      │
+          └────────┬─────────┘
+                   ↓
+          ┌──────────────────┐
+          │ Create Producer  │
+          └────────┬─────────┘
+                   ↓
+          ┌──────────────────┐
+          │ Send Messages    │
+          │ Asynchronously   │
+          └────────┬─────────┘
+                   ↓
+          ┌──────────────────┐
+          │ Flush Producer   │
+          └────────┬─────────┘
+                   ↓
+          ┌──────────────────┐
+          │ Send Messages    │
+          │ Synchronously    │
+          └────────┬─────────┘
+                   ↓
+          ┌──────────────────┐
+          │ Wait for ACK /   │
+          │ Message Result   │
+          └────────┬─────────┘
+                   ↓
+          ┌──────────────────┐
+          │ All Messages     │
+          │ Sent             │
+          └────────┬─────────┘
+                   ↓
+             ┌───────────┐
+             │    END    │
+             └───────────┘
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+WEEK–1 — Commands Flowchart
+
+Aim: Install Apache Kafka on a single node.
+
+       ┌─────────────┐
+       │    START    │
+       └──────┬──────┘
+              ↓
+ ┌─────────────────────────┐
+ │ docker pull             │
+ │ wurstmeister/zookeeper  │
+ └───────────┬─────────────┘
+             ↓
+ ┌─────────────────────────┐
+ │ docker pull             │
+ │ wurstmeister/kafka      │
+ └───────────┬─────────────┘
+             ↓
+ ┌─────────────────────────┐
+ │ Run Zookeeper           │
+ │ docker run ...          │
+ └───────────┬─────────────┘
+             ↓
+ ┌─────────────────────────┐
+ │ Run Kafka Broker        │
+ │ docker run ...          │
+ └───────────┬─────────────┘
+             ↓
+       ┌─────────────┐
+       │ Kafka Ready │
+       └──────┬──────┘
+              ↓
+       ┌─────────────┐
+       │     END     │
+       └─────────────┘
+Commands to write
+docker pull wurstmeister/zookeeper
+docker pull wurstmeister/kafka
+
+docker run -d --name zookeeper -p 2181:2181 wurstmeister/zookeeper
+
+docker run -d --name kafka -p 9092:9092 --link zookeeper:zookeeper \
+-e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
+-e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
+-e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
+wurstmeister/kafka
+WEEK–2 — Commands Flowchart
+       ┌─────────────┐
+       │    START    │
+       └──────┬──────┘
+              ↓
+ ┌───────────────────────────┐
+ │ Create Topic              │
+ │ kafka-topics.sh --create  │
+ └────────────┬──────────────┘
+              ↓
+ ┌───────────────────────────┐
+ │ Describe Topic             │
+ │ kafka-topics.sh --describe│
+ └────────────┬──────────────┘
+              ↓
+ ┌───────────────────────────┐
+ │ Start Producer             │
+ │ kafka-console-producer.sh  │
+ └────────────┬──────────────┘
+              ↓
+ ┌───────────────────────────┐
+ │ Enter / Send Messages     │
+ └────────────┬──────────────┘
+              ↓
+ ┌───────────────────────────┐
+ │ Start Consumer             │
+ │ kafka-console-consumer.sh  │
+ └────────────┬──────────────┘
+              ↓
+ ┌───────────────────────────┐
+ │ Messages Received          │
+ └────────────┬──────────────┘
+              ↓
+       ┌─────────────┐
+       │     END     │
+       └─────────────┘
+Commands to write
+bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
+
+bin/kafka-topics.sh --describe --topic quickstart-events --bootstrap-server localhost:9092
+
+bin/kafka-console-producer.sh --topic quickstart-events --bootstrap-server localhost:9092
+
+bin/kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server localhost:9092
+
+These are the basic create, describe, produce and consume commands from Week-2.
+
+WEEK–3 — Commands Flowchart
+          ┌─────────────┐
+          │    START    │
+          └──────┬──────┘
+                 ↓
+      ┌────────────────────┐
+      │ Start Multi-Broker │
+      │ Kafka Cluster      │
+      └─────────┬──────────┘
+                ↓
+      ┌────────────────────┐
+      │ docker compose     │
+      │ up -d              │
+      └─────────┬──────────┘
+                ↓
+      ┌────────────────────┐
+      │ Go to Java App     │
+      │ Directory          │
+      └─────────┬──────────┘
+                ↓
+      ┌────────────────────┐
+      │ mvn clean package  │
+      └─────────┬──────────┘
+                ↓
+      ┌────────────────────┐
+      │ CreateTopic        │
+      └─────────┬──────────┘
+                ↓
+      ┌────────────────────┐
+      │ Producer           │
+      └─────────┬──────────┘
+                ↓
+      ┌────────────────────┐
+      │ Consumer           │
+      └─────────┬──────────┘
+                ↓
+          ┌─────────────┐
+          │     END     │
+          └─────────────┘
+Commands to write
+docker compose up -d
+
+cd ~/kafka_2.13-4.3.1/kafka-multi-broker/java-app
+
+mvn clean package
+
+mvn exec:java -Dexec.mainClass=com.example.CreateTopic
+
+mvn exec:java -Dexec.mainClass=com.example.Producer
+
+mvn exec:java -Dexec.mainClass=com.example.Consumer
+
+The Week-3 document uses Docker Compose for the multi-broker setup and these Maven commands for the Java application.
+
+WEEK–4 — Commands Flowchart
+       ┌─────────────┐
+       │    START    │
+       └──────┬──────┘
+              ↓
+ ┌───────────────────────┐
+ │ Start Docker Kafka    │
+ │ docker compose up -d  │
+ └──────────┬────────────┘
+            ↓
+ ┌───────────────────────┐
+ │ Compile Java Programs │
+ │ javac -cp "lib/*" ... │
+ └──────────┬────────────┘
+            ↓
+ ┌───────────────────────┐
+ │ Run Topic Creator     │
+ └──────────┬────────────┘
+            ↓
+ ┌───────────────────────┐
+ │ Run Consumer          │
+ └──────────┬────────────┘
+            ↓
+ ┌───────────────────────┐
+ │ Run Producer          │
+ └──────────┬────────────┘
+            ↓
+ ┌───────────────────────┐
+ │ Send Hello Kafka      │
+ └──────────┬────────────┘
+            ↓
+ ┌───────────────────────┐
+ │ Consumer receives it  │
+ └──────────┬────────────┘
+            ↓
+       ┌─────────────┐
+       │     END     │
+       └─────────────┘
+Commands to write
+docker compose up -d
+
+javac -cp "lib/*" -d out src/main/java/com/example/kafka/*.java
+
+java -cp "out:lib/*" com.example.kafka.KafkaTopicCreator
+
+java -cp "out:lib/*" com.example.kafka.KafkaConsumerExample
+
+java -cp "out:lib/*" com.example.kafka.KafkaProducerExample
+
+The compile/run commands are from the Week-4 document.
+
+WEEK–5 — Commands Flowchart
+       ┌─────────────┐
+       │    START    │
+       └──────┬──────┘
+              ↓
+ ┌───────────────────────┐
+ │ Start Kafka           │
+ │ docker-compose up -d  │
+ └──────────┬────────────┘
+            ↓
+ ┌───────────────────────┐
+ │ Maven Build           │
+ │ mvn clean package     │
+ └──────────┬────────────┘
+            ↓
+ ┌───────────────────────┐
+ │ Run AsyncProducer     │
+ │ java -jar ...         │
+ └──────────┬────────────┘
+            ↓
+ ┌───────────────────────┐
+ │ Async Messages Sent   │
+ └──────────┬────────────┘
+            ↓
+ ┌───────────────────────┐
+ │ Run SyncProducer      │
+ │ java -cp ...          │
+ └──────────┬────────────┘
+            ↓
+ ┌───────────────────────┐
+ │ Sync Messages Sent    │
+ └──────────┬────────────┘
+            ↓
+       ┌─────────────┐
+       │     END     │
+       └─────────────┘
+Commands to write
+docker-compose up -d
+
+mvn clean package
+
+java -jar target/kafka-producer-demo-1.0-SNAPSHOT-shaded.jar
+
+java -cp target/kafka-producer-demo-1.0-SNAPSHOT-shaded.jar com.example.kafka.SyncProducer
+
+These are the final execution commands specified in Week-5.
+
+⭐ Super-Easy Revision Chart
+Week	Main Commands Flow
+1	Pull Images → Run Zookeeper → Run Kafka
+2	Create Topic → Describe → Producer → Consumer
+3	Docker Compose → Maven Build → CreateTopic → Producer → Consumer
+4	Docker Compose → javac → TopicCreator → Consumer → Producer
+5	Docker Compose → Maven Build → AsyncProducer → SyncProducer
+🧠 Remember like this:
+WEEK 1 → INSTALL
+    ↓
+WEEK 2 → BASIC KAFKA
+    ↓
+WEEK 3 → MULTIPLE BROKERS
+    ↓
+WEEK 4 → JAVA PRODUCER + CONSUMER
+    ↓
+WEEK 5 → ASYNC + SYNC PRODUCER
