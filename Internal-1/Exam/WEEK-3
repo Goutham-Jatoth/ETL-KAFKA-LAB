@@ -1,0 +1,75 @@
+Week–3: Multiple Kafka Brokers
+
+Aim: Extend Kafka to multiple brokers on a single node.
+
+Step 1: Start Cluster
+docker compose up -d
+Step 2: Build Java Project
+cd ~/kafka_2.13-4.3.1/kafka-multi-broker/java-app
+mvn clean package
+Step 3: Create Topic — CreateTopic.java
+package com.example;
+import org.apache.kafka.clients.admin.*;
+import java.util.*;
+
+public class CreateTopic {
+ public static void main(String[] a)throws Exception{
+  Properties p=new Properties();
+  p.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:29092,localhost:29093");
+  try(AdminClient c=AdminClient.create(p)){
+   c.createTopics(Collections.singleton(
+    new NewTopic("test-topic",3,(short)2))).all().get();
+   System.out.println("Topic created");
+  }
+ }
+}
+
+Run:
+
+mvn exec:java -Dexec.mainClass=com.example.CreateTopic
+Step 4: Producer — Producer.java
+package com.example;
+import org.apache.kafka.clients.producer.*;
+import java.util.*;
+
+public class Producer {
+ public static void main(String[] a)throws Exception{
+  Properties p=new Properties();
+  p.put("bootstrap.servers","localhost:29092,localhost:29093");
+  p.put("key.serializer","org.apache.kafka.common.serialization.StringSerializer");
+  p.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
+  KafkaProducer<String,String> k=new KafkaProducer<>(p);
+  k.send(new ProducerRecord<>("test-topic","1","Hello Kafka")).get();
+  k.close();
+ }
+}
+
+Run:
+
+mvn exec:java -Dexec.mainClass=com.example.Producer
+Step 5: Consumer — Consumer.java
+package com.example;
+import org.apache.kafka.clients.consumer.*;
+import java.time.Duration;
+import java.util.*;
+
+public class Consumer {
+ public static void main(String[] a){
+  Properties p=new Properties();
+  p.put("bootstrap.servers","localhost:29092,localhost:29093");
+  p.put("group.id","test-group");
+  p.put("key.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
+  p.put("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
+  KafkaConsumer<String,String> c=new KafkaConsumer<>(p);
+  c.subscribe(Collections.singletonList("test-topic"));
+  while(true)
+   for(ConsumerRecord<String,String> r:c.poll(Duration.ofMillis(1000)))
+    System.out.println(r.value());
+ }
+}
+
+Run:
+
+mvn exec:java -Dexec.mainClass=com.example.Consumer
+
+Result: Multiple brokers created and message successfully produced/consumed
