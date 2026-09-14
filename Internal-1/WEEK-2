@@ -1,0 +1,342 @@
+WEEK–2: Single-Node Kafka — Create Topic, Produce & Consume Messages
+🎯 Aim
+
+To demonstrate a single-node, single-broker Kafka cluster and perform basic operations such as:
+
+Start Kafka and ZooKeeper
+Create a Kafka topic
+Describe the topic
+Produce messages
+Consume messages
+STEP 0: Start Docker
+
+Open Ubuntu Terminal:
+
+sudo systemctl start docker
+
+Check:
+
+docker ps
+STEP 1: Start ZooKeeper
+
+If you already completed Week-1 and the containers are still present, don't create them again.
+
+First check:
+
+docker ps -a
+If zookeeper and kafka already exist
+
+Start them:
+
+docker start zookeeper
+docker start kafka
+
+Then check:
+
+docker ps
+
+You should see:
+
+zookeeper
+kafka
+If they don't exist
+
+Run:
+
+docker run -d --name zookeeper -p 2181:2181 wurstmeister/zookeeper
+
+Then:
+
+docker run -d --name kafka -p 9092:9092 --link zookeeper:zookeeper -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 wurstmeister/kafka
+
+These are the same Kafka/ZooKeeper containers used in your Week-1 setup.
+
+STEP 2: Check Kafka is Running
+
+Run:
+
+docker ps
+
+You should see both:
+
+zookeeper
+kafka
+If Kafka isn't running
+
+Check:
+
+docker logs kafka
+STEP 3: Open a Shell Inside Kafka Container
+
+This is the easiest way to run Kafka commands.
+
+docker exec -it kafka bash
+
+Your terminal prompt will change to something similar to:
+
+bash-4.2#
+
+Now you are inside the Kafka container.
+
+STEP 4: Create a Topic
+
+Your document uses the topic name:
+
+quickstart-events
+
+Run:
+
+bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
+
+You should get something like:
+
+Created topic quickstart-events.
+
+✅ Topic created.
+
+STEP 5: Describe the Topic
+
+Now run:
+
+bin/kafka-topics.sh --describe --topic quickstart-events --bootstrap-server localhost:9092
+
+Your document shows output containing:
+
+PartitionCount: 1
+ReplicationFactor: 1
+
+and:
+
+Partition: 0
+Leader: 0
+Replicas: 0
+Isr: 0
+
+What this means
+PartitionCount = 1 → topic has one partition
+ReplicationFactor = 1 → one copy of the data
+Leader = 0 → broker 0 is the leader
+
+This confirms it is a single-broker setup.
+
+STEP 6: Start the Kafka Producer
+
+Still inside the Kafka container, run:
+
+bin/kafka-console-producer.sh --topic quickstart-events --bootstrap-server localhost:9092
+
+This is the producer command from your document.
+
+You will see:
+
+>
+
+Now type messages.
+
+For example:
+
+Hello Kafka
+
+Press Enter.
+
+Then:
+
+This is my first message
+
+Press Enter.
+
+Then:
+
+This is my second message
+
+Press Enter.
+
+So it looks like:
+
+>Hello Kafka
+>This is my first message
+>This is my second message
+⚠️ Don't close this terminal yet.
+
+Keep the producer running.
+
+STEP 7: Open a SECOND Terminal
+
+This is important.
+
+Open another Ubuntu Terminal.
+
+Keep Terminal 1 running.
+
+In Terminal 2, enter the Kafka container:
+
+docker exec -it kafka bash
+STEP 8: Start the Kafka Consumer
+
+In Terminal 2, run:
+
+bin/kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server localhost:9092
+
+This is the consumer command from your lab material.
+
+You should see:
+
+Hello Kafka
+This is my first message
+This is my second message
+
+🎉 Kafka Producer → Kafka Topic → Kafka Consumer is working.
+
+🔥 COMPLETE EXECUTION FLOW
+
+Remember this diagram:
+
+              KAFKA
+                |
+        quickstart-events
+                |
+       -------------------
+       |                 |
+   PRODUCER           CONSUMER
+       |                 |
+    Messages          Reads
+
+Or simply:
+
+Producer
+   ↓
+Topic
+   ↓
+Consumer
+🖥️ TERMINAL-WISE PROCEDURE
+
+This is the most important part for your lab exam.
+
+Terminal 1 — Start Kafka
+docker ps
+
+If containers are stopped:
+
+docker start zookeeper
+docker start kafka
+
+Then:
+
+docker exec -it kafka bash
+
+Create topic:
+
+bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
+
+Describe:
+
+bin/kafka-topics.sh --describe --topic quickstart-events --bootstrap-server localhost:9092
+
+Start producer:
+
+bin/kafka-console-producer.sh --topic quickstart-events --bootstrap-server localhost:9092
+
+Type:
+
+Hello Kafka
+First Message
+Second Message
+
+Do not close Terminal 1.
+
+Terminal 2 — Consumer
+
+Open a new terminal.
+
+docker exec -it kafka bash
+
+Then:
+
+bin/kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server localhost:9092
+
+Output:
+
+Hello Kafka
+First Message
+Second Message
+🛑 How to Stop
+
+When your experiment is complete:
+
+Stop producer
+
+Press:
+
+Ctrl + C
+Stop consumer
+
+Press:
+
+Ctrl + C
+Exit Kafka container
+exit
+Stop Kafka and ZooKeeper
+
+From normal Ubuntu terminal:
+
+docker stop kafka zookeeper
+⚠️ COMMON PROBLEM: Topic Already Exists
+
+If you run:
+
+bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
+
+and get:
+
+Topic 'quickstart-events' already exists
+
+Don't worry.
+
+The topic has already been created.
+
+Simply continue with:
+
+bin/kafka-topics.sh --describe --topic quickstart-events --bootstrap-server localhost:9092
+
+Then start the producer.
+
+⚠️ COMMON PROBLEM: Container Already Exists
+
+If you get:
+
+Conflict. The container name "/kafka" is already in use
+
+Don't run docker run again.
+
+Use:
+
+docker start kafka
+
+and:
+
+docker start zookeeper
+⭐ Shortest Commands to Memorize
+
+For the actual lab, remember these:
+
+Start
+docker start zookeeper
+docker start kafka
+Enter Kafka
+docker exec -it kafka bash
+Create Topic
+bin/kafka-topics.sh --create --topic quickstart-events --bootstrap-server localhost:9092
+Describe Topic
+bin/kafka-topics.sh --describe --topic quickstart-events --bootstrap-server localhost:9092
+Producer
+bin/kafka-console-producer.sh --topic quickstart-events --bootstrap-server localhost:9092
+Consumer
+bin/kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server localhost:9092
+📝 Lab Record
+Aim
+
+To demonstrate a single-node, single-broker Kafka cluster and perform basic Kafka operations.
+
+Result
+
+A Kafka topic was successfully created, messages were produced to the topic, and the messages were successfully consumed using the Kafka consumer.
