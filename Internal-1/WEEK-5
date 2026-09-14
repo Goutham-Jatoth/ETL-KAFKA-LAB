@@ -1,0 +1,560 @@
+WEEK-5 — Kafka Producer: Synchronous & Asynchronous
+🎯 Aim
+
+Implement sending messages both synchronously and asynchronously in the Kafka producer.
+
+1. Create the project directory
+
+Open Terminal and run:
+
+mkdir -p kafka-producer-demo/src/main/java/com/example/kafka
+cd kafka-producer-demo
+
+The PDF uses this project structure:
+
+kafka-producer-demo/
+├── pom.xml
+├── src/
+│   └── main/
+│       └── java/
+│           └── com/
+│               └── example/
+│                   └── kafka/
+│                       ├── AsyncProducer.java
+│                       └── SyncProducer.java
+├── target/
+├── docker-compose.yml
+└── lib/
+2. Create docker-compose.yml
+
+Inside kafka-producer-demo, create:
+
+nano docker-compose.yml
+
+Paste exactly this:
+
+version: '3.8'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+Save:
+
+Ctrl + O → Enter → Ctrl + X
+
+The PDF specifically uses 9093 for Java programs running on the host, while kafka:9092 is for clients inside Docker.
+
+⭐ Important
+
+For this Week-5 experiment:
+
+Docker internal → kafka:9092
+Your Java program → 127.0.0.1:9093
+
+So do not change the Java code to 9092.
+
+3. Start Kafka and Zookeeper
+
+Run:
+
+docker-compose up -d
+
+This starts the containers.
+
+Check:
+
+docker ps
+
+You should see containers for:
+
+zookeeper
+kafka
+4. Create pom.xml
+
+Run:
+
+nano pom.xml
+
+Paste the PDF's Maven configuration:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example.kafka</groupId>
+    <artifactId>kafka-producer-demo</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Kafka Producer Demo</name>
+    <description>A simple Kafka producer example using Java and Maven</description>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <kafka.version>3.6.0</kafka.version>
+        <slf4j.version>2.0.9</slf4j.version>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${kafka.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <transformer
+                                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.example.kafka.AsyncProducer</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>
+
+The PDF specifies Kafka client 3.6.0, Java source/target 1.8, and the Maven Shade plugin.
+
+Save:
+
+Ctrl + O
+Enter
+Ctrl + X
+5. Create AsyncProducer.java
+
+Go to the Java folder:
+
+cd src/main/java/com/example/kafka
+
+Create the file:
+
+nano AsyncProducer.java
+
+Paste:
+
+package com.example.kafka;
+
+import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.common.serialization.StringSerializer;
+
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+
+public class AsyncProducer {
+
+    public static void main(String[] args) {
+
+        String topic = "demo-topic";
+
+        Properties props = new Properties();
+
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9093");
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                StringSerializer.class.getName());
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                StringSerializer.class.getName());
+        props.put(ProducerConfig.ACKS_CONFIG, "1");
+        props.put(ProducerConfig.RETRIES_CONFIG, 3);
+        props.put(ProducerConfig.LINGER_MS_CONFIG, 10);
+
+        try (KafkaProducer<String, String> producer =
+                     new KafkaProducer<>(props)) {
+
+            System.out.println("=== Sending ASYNCHRONOUS messages ===");
+
+            for (int i = 1; i <= 5; i++) {
+
+                String key = "async-key-" + i;
+                String value = "async-message-" + i;
+
+                ProducerRecord<String, String> record =
+                        new ProducerRecord<>(topic, key, value);
+
+                producer.send(record, (metadata, exception) -> {
+
+                    if (exception != null) {
+
+                        System.err.printf(
+                                "Failed to send %s : %s%n",
+                                value,
+                                exception.getMessage());
+
+                    } else {
+
+                        System.out.printf(
+                                "Sent async: key=%s value=%s partition=%d offset=%d%n",
+                                key,
+                                value,
+                                metadata.partition(),
+                                metadata.offset());
+                    }
+                });
+            }
+
+            producer.flush();
+
+            System.out.println("\n=== Sending SYNCHRONOUS messages ===");
+
+            for (int i = 1; i <= 5; i++) {
+
+                String key = "sync-key-" + i;
+                String value = "sync-message-" + i;
+
+                ProducerRecord<String, String> record =
+                        new ProducerRecord<>(topic, key, value);
+
+                try {
+
+                    RecordMetadata metadata =
+                            producer.send(record).get();
+
+                    System.out.printf(
+                            "Sent sync: key=%s value=%s partition=%d offset=%d%n",
+                            key,
+                            value,
+                            metadata.partition(),
+                            metadata.offset());
+
+                } catch (InterruptedException | ExecutionException e) {
+
+                    System.err.printf(
+                            "Failed to send %s : %s%n",
+                            value,
+                            e.getMessage());
+                }
+            }
+
+            System.out.println("\nAll messages sent successfully!");
+        }
+    }
+}
+
+This is the PDF's asynchronous + synchronous producer implementation.
+
+Save and exit.
+
+6. Create SyncProducer.java
+
+Still inside:
+
+src/main/java/com/example/kafka
+
+Run:
+
+nano SyncProducer.java
+
+Paste:
+
+package com.example.kafka;
+
+import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.common.serialization.StringSerializer;
+
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+public class SyncProducer {
+
+    public static void main(String[] args) {
+
+        String topic = "demo-topic";
+
+        Properties props = new Properties();
+
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9093");
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                StringSerializer.class.getName());
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                StringSerializer.class.getName());
+        props.put(ProducerConfig.ACKS_CONFIG, "all");
+        props.put(ProducerConfig.RETRIES_CONFIG, 3);
+        props.put(ProducerConfig.LINGER_MS_CONFIG, 10);
+
+        try (KafkaProducer<String, String> producer =
+                     new KafkaProducer<>(props)) {
+
+            System.out.println("=== Sending SYNCHRONOUS messages ===");
+
+            for (int i = 1; i <= 10; i++) {
+
+                String key = "sync-key-" + i;
+                String value = "sync-message-" + i;
+
+                ProducerRecord<String, String> record =
+                        new ProducerRecord<>(topic, key, value);
+
+                try {
+
+                    RecordMetadata metadata =
+                            producer.send(record)
+                                    .get(5, TimeUnit.SECONDS);
+
+                    System.out.printf(
+                            "Sent sync: key=%s value=%s partition=%d offset=%d%n",
+                            key,
+                            value,
+                            metadata.partition(),
+                            metadata.offset());
+
+                } catch (InterruptedException |
+                         ExecutionException |
+                         TimeoutException e) {
+
+                    System.err.printf(
+                            "Failed to send record key=%s value=%s : %s%n",
+                            key,
+                            value,
+                            e.getMessage());
+                }
+            }
+
+            System.out.println(
+                    "All synchronous messages sent successfully!");
+
+        } catch (Exception e) {
+
+            System.err.println(
+                    "Producer failed: " + e.getMessage());
+        }
+    }
+}
+
+This follows the PDF's separate synchronous producer.
+
+7. Go back to project directory
+
+Run:
+
+cd ../../../../../../..
+
+You should be back in:
+
+kafka-producer-demo
+
+Check:
+
+pwd
+
+You should have:
+
+.../kafka-producer-demo
+8. Build the project
+
+This is the main build command from the PDF:
+
+mvn clean package
+
+The PDF specifically says this single command performs the required build.
+
+If successful, check:
+
+ls target
+
+You should see something similar to:
+
+classes
+kafka-producer-demo-1.0-SNAPSHOT-shaded.jar
+9. Run Asynchronous Producer
+
+Run:
+
+java -jar target/kafka-producer-demo-1.0-SNAPSHOT-shaded.jar
+
+Because the Shade plugin's mainClass is:
+
+com.example.kafka.AsyncProducer
+
+this command runs AsyncProducer.
+
+Expected output
+=== Sending ASYNCHRONOUS messages ===
+
+Sent async: key=async-key-1 value=async-message-1 partition=0 offset=...
+Sent async: key=async-key-2 value=async-message-2 partition=0 offset=...
+Sent async: key=async-key-3 value=async-message-3 partition=0 offset=...
+Sent async: key=async-key-4 value=async-message-4 partition=0 offset=...
+Sent async: key=async-key-5 value=async-message-5 partition=0 offset=...
+
+=== Sending SYNCHRONOUS messages ===
+
+Sent sync: key=sync-key-1 value=sync-message-1 partition=0 offset=...
+...
+Sent sync: key=sync-key-5 value=sync-message-5 partition=0 offset=...
+
+All messages sent successfully!
+
+The exact offsets can be different on your system. The PDF's sample shows the same pattern.
+
+10. Run Separate SyncProducer
+
+The PDF uses:
+
+java -cp target/kafka-producer-demo-1.0-SNAPSHOT-shaded.jar com.example.kafka.SyncProducer
+
+This directly runs the SyncProducer class.
+
+Expected:
+
+=== Sending SYNCHRONOUS messages ===
+
+Sent sync: key=sync-key-1 value=sync-message-1 partition=0 offset=...
+Sent sync: key=sync-key-2 value=sync-message-2 partition=0 offset=...
+Sent sync: key=sync-key-3 value=sync-message-3 partition=0 offset=...
+...
+Sent sync: key=sync-key-10 value=sync-message-10 partition=0 offset=...
+
+All synchronous messages sent successfully!
+⭐ What is happening?
+Asynchronous
+producer.send(record, callback);
+
+Means:
+
+Send the message and don't wait for the result immediately.
+
+The callback tells us whether the message was successfully sent.
+
+Synchronous
+producer.send(record).get();
+
+Means:
+
+Send the message and wait for the result before continuing.
+
+🧠 Easy difference for viva
+Asynchronous	Synchronous
+Does not wait	Waits for response
+Faster	Comparatively slower
+Uses callback	Uses get()
+Multiple sends can proceed	Each send waits
+Example: send(record, callback)	Example: send(record).get()
+One-line viva answer:
+
+Asynchronous sending sends the message without waiting for the result, whereas synchronous sending waits for the broker acknowledgement before continuing.
+
+⚠️ Very Important Week-5 Points
+1. Topic name
+
+Both programs use:
+
+demo-topic
+
+2. Kafka connection
+
+Use:
+
+127.0.0.1:9093
+
+NOT:
+
+127.0.0.1:9092
+
+The PDF explicitly corrected this because 9092 is the internal Docker listener and 9093 is the host listener.
+
+3. Build command
+
+Just:
+
+mvn clean package
+
+No need to separately run:
+
+mvn clean
+mvn clean compile
+
+The PDF specifically removed those redundant steps.
+
+4. Only ONE shaded JAR
+
+Correct:
+
+kafka-producer-demo-1.0-SNAPSHOT-shaded.jar
+
+There is no:
+
+async-producer-1.0-SNAPSHOT-shaded.jar
+
+The PDF explicitly corrected this.
+
+🚀 Super-short lab exam procedure
+
+If you already created all the files, remember only this:
+
+cd kafka-producer-demo
+Terminal
+docker-compose up -d
+Build
+mvn clean package
+Run AsyncProducer
+java -jar target/kafka-producer-demo-1.0-SNAPSHOT-shaded.jar
+Run SyncProducer
+java -cp target/kafka-producer-demo-1.0-SNAPSHOT-shaded.jar com.example.kafka.SyncProducer
+
+That's the complete Week-5 execution flow according to the PDF.
