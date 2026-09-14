@@ -1,0 +1,589 @@
+WEEK–3
+Extend the cluster to multiple brokers on a single node
+What you will create
+ZooKeeper
+   │
+   ├── Kafka Broker 1 → localhost:29092
+   │
+   └── Kafka Broker 2 → localhost:29093
+             │
+          Kafka UI
+        localhost:8080
+
+The PDF uses 2 Kafka brokers, ZooKeeper, Kafka UI, Docker Compose, and a Java Maven application.
+
+STEP 1 — Go to the Week-3 folder
+
+Open Terminal and run:
+
+cd ~/kafka_2.13-4.3.1/kafka-multi-broker
+
+Then check:
+
+ls
+
+You should have the files/folders for the project, including:
+
+docker-compose.yml
+java-app
+
+The PDF specifies this directory structure.
+
+STEP 2 — Create docker-compose.yml
+
+Run:
+
+nano docker-compose.yml
+
+Delete everything currently inside the file and paste this exact content from your PDF:
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - kafka-net
+
+  kafka1:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: kafka1
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka1:9092,OUTSIDE://localhost:29092
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+    depends_on:
+      - zookeeper
+    networks:
+      - kafka-net
+
+  kafka2:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: kafka2
+    ports:
+      - "9093:9093"
+      - "29093:29093"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka2:9093,OUTSIDE://localhost:29093
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:29093
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+    depends_on:
+      - zookeeper
+    networks:
+      - kafka-net
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1:9092,kafka2:9093
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    depends_on:
+      - kafka1
+      - kafka2
+    networks:
+      - kafka-net
+
+networks:
+  kafka-net:
+    driver: bridge
+
+This is the docker-compose.yml content from the PDF.
+
+Save the file
+
+Press:
+
+Ctrl + O
+
+Press:
+
+Enter
+
+Then:
+
+Ctrl + X
+STEP 3 — Start the complete cluster
+
+Now run:
+
+docker compose up -d
+
+This is the command given in the PDF.
+
+Wait for the containers to start.
+
+Then check:
+
+docker ps
+
+You should see:
+
+zookeeper
+kafka1
+kafka2
+kafka-ui
+Your ports
+
+Remember these:
+
+Component	Port
+ZooKeeper	2181
+Kafka Broker 1	29092
+Kafka Broker 2	29093
+Kafka UI	8080
+
+The two Kafka brokers are configured with broker IDs 1 and 2.
+
+STEP 4 — Create the Java application files
+
+Go into Java application:
+
+cd java-app
+
+Check:
+
+ls
+
+You should have:
+
+pom.xml
+src
+
+The PDF specifies:
+
+java-app/
+├── pom.xml
+└── src/main/java/com/example/
+    ├── Producer.java
+    ├── CreateTopic.java
+    └── Consumer.java
+
+STEP 5 — Create pom.xml
+
+Run:
+
+nano pom.xml
+
+Paste exactly:
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>kafka-java-app</artifactId>
+    <version>1.0.0</version>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>3.6.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <cleanupDaemonThreads>false</cleanupDaemonThreads>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+
+The PDF uses Java 17, Kafka client 3.6.1, and exec-maven-plugin 3.1.0.
+
+Save:
+
+Ctrl + O
+Enter
+Ctrl + X
+STEP 6 — Create the Java source folder
+
+Run:
+
+mkdir -p src/main/java/com/example
+
+Go there:
+
+cd src/main/java/com/example
+STEP 7 — Create CreateTopic.java
+
+Run:
+
+nano CreateTopic.java
+
+Paste the exact PDF code:
+
+package com.example;
+
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.NewTopic;
+
+import java.util.Collections;
+import java.util.Properties;
+
+public class CreateTopic {
+    public static void main(String[] args) throws Exception {
+
+        Properties props = new Properties();
+
+        props.put(
+            AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
+            "localhost:29092,localhost:29093"
+        );
+
+        try (AdminClient admin = AdminClient.create(props)) {
+
+            NewTopic topic = new NewTopic(
+                "test-topic",
+                3,
+                (short) 2
+            );
+
+            admin.createTopics(
+                Collections.singleton(topic)
+            ).all().get();
+
+            System.out.println(
+                "Topic 'test-topic' created successfully."
+            );
+
+        } catch (Exception e) {
+
+            System.err.println(
+                "Error while creating topic:"
+            );
+
+            e.printStackTrace();
+        }
+    }
+}
+
+Save:
+
+Ctrl + O
+Enter
+Ctrl + X
+
+This creates test-topic with 3 partitions and replication factor 2.
+
+STEP 8 — Create Producer.java
+
+Run:
+
+nano Producer.java
+
+Paste exactly:
+
+package com.example;
+
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
+
+import java.util.Properties;
+
+public class Producer {
+
+    public static void main(String[] args) throws Exception {
+
+        Properties props = new Properties();
+
+        props.put(
+            "bootstrap.servers",
+            "localhost:29092,localhost:29093"
+        );
+
+        props.put(
+            "key.serializer",
+            "org.apache.kafka.common.serialization.StringSerializer"
+        );
+
+        props.put(
+            "value.serializer",
+            "org.apache.kafka.common.serialization.StringSerializer"
+        );
+
+        try (KafkaProducer<String, String> producer =
+                 new KafkaProducer<>(props)) {
+
+            for (int i = 1; i <= 5; i++) {
+
+                String key = "key-" + i;
+                String value = "Hello Kafka message " + i;
+
+                ProducerRecord<String, String> record =
+                    new ProducerRecord<>(
+                        "test-topic",
+                        key,
+                        value
+                    );
+
+                RecordMetadata metadata =
+                    producer.send(record).get();
+
+                System.out.println(
+                    "Message sent successfully: " +
+                    "key=" + key +
+                    ", value=" + value +
+                    ", partition=" + metadata.partition() +
+                    ", offset=" + metadata.offset()
+                );
+            }
+
+            producer.flush();
+
+        } catch (Exception e) {
+
+            System.err.println(
+                "Error while producing messages:"
+            );
+
+            e.printStackTrace();
+        }
+    }
+}
+
+Save:
+
+Ctrl + O
+Enter
+Ctrl + X
+
+This producer sends 5 messages to test-topic.
+
+STEP 9 — Create Consumer.java
+
+Run:
+
+nano Consumer.java
+
+Paste exactly:
+
+package com.example;
+
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Properties;
+
+public class Consumer {
+
+    public static void main(String[] args) {
+
+        Properties props = new Properties();
+
+        props.put(
+            "bootstrap.servers",
+            "localhost:29092,localhost:29093"
+        );
+
+        props.put(
+            "group.id",
+            "test-group"
+        );
+
+        props.put(
+            "key.deserializer",
+            "org.apache.kafka.common.serialization.StringDeserializer"
+        );
+
+        props.put(
+            "value.deserializer",
+            "org.apache.kafka.common.serialization.StringDeserializer"
+        );
+
+        props.put(
+            "auto.offset.reset",
+            "earliest"
+        );
+
+        try (KafkaConsumer<String, String> consumer =
+                 new KafkaConsumer<>(props)) {
+
+            consumer.subscribe(
+                Collections.singletonList("test-topic")
+            );
+
+            System.out.println(
+                "Listening for messages on test-topic..."
+            );
+
+            while (true) {
+
+                ConsumerRecords<String, String> records =
+                    consumer.poll(Duration.ofMillis(1000));
+
+                for (ConsumerRecord<String, String> record : records) {
+
+                    System.out.println(
+                        "Received message: " +
+                        "key=" + record.key() +
+                        ", value=" + record.value() +
+                        ", partition=" + record.partition() +
+                        ", offset=" + record.offset()
+                    );
+                }
+            }
+
+        } catch (Exception e) {
+
+            System.err.println(
+                "Error while consuming messages:"
+            );
+
+            e.printStackTrace();
+        }
+    }
+}
+
+Save:
+
+Ctrl + O
+Enter
+Ctrl + X
+
+This consumer listens to test-topic using consumer group test-group.
+
+STEP 10 — Go back to java-app
+
+Currently you are inside:
+
+java-app/src/main/java/com/example
+
+Run:
+
+cd ~/kafka_2.13-4.3.1/kafka-multi-broker/java-app
+STEP 11 — Build the Java application
+
+Run the exact PDF command:
+
+mvn clean package
+
+The PDF gives this command for building the application.
+
+If successful, you should see:
+
+BUILD SUCCESS
+STEP 12 — Create the Kafka topic
+
+Run:
+
+mvn exec:java -Dexec.mainClass=com.example.CreateTopic
+
+This is the exact command from the PDF.
+
+Expected output:
+
+Topic 'test-topic' created successfully.
+
+Now your topic is:
+
+test-topic
+
+with:
+
+Partitions = 3
+Replication Factor = 2
+STEP 13 — Run Producer
+
+Run:
+
+mvn exec:java -Dexec.mainClass=com.example.Producer
+
+The PDF's Producer sends 5 messages:
+
+Hello Kafka message 1
+Hello Kafka message 2
+Hello Kafka message 3
+Hello Kafka message 4
+Hello Kafka message 5
+
+You should see output similar to:
+
+Message sent successfully: key=key-1, value=Hello Kafka message 1, partition=..., offset=...
+Message sent successfully: key=key-2, value=Hello Kafka message 2, partition=..., offset=...
+Message sent successfully: key=key-3, value=Hello Kafka message 3, partition=..., offset=...
+Message sent successfully: key=key-4, value=Hello Kafka message 4, partition=..., offset=...
+Message sent successfully: key=key-5, value=Hello Kafka message 5, partition=..., offset=...
+
+The partition numbers may differ, so don't worry if yours are not exactly the same.
+
+STEP 14 — Run Consumer
+
+Open another terminal.
+
+Run:
+
+cd ~/kafka_2.13-4.3.1/kafka-multi-broker/java-app
+
+Then:
+
+mvn exec:java -Dexec.mainClass=com.example.Consumer
+
+You should first see:
+
+Listening for messages on test-topic...
+
+Then messages similar to:
+
+Received message: key=key-1, value=Hello Kafka message 1, partition=..., offset=...
+Received message: key=key-2, value=Hello Kafka message 2, partition=..., offset=...
+Received message: key=key-3, value=Hello Kafka message 3, partition=..., offset=...
+Received message: key=key-4, value=Hello Kafka message 4, partition=..., offset=...
+Received message: key=key-5, value=Hello Kafka message 5, partition=..., offset=...
+
+The exact partition and offset values can vary.
+
+STEP 15 — Open Kafka UI
+
+Your PDF configures Kafka UI on port 8080.
+
+Open your browser and enter:
+
+http://localhost:8080
+
+You should see the Kafka UI.
+
+You can use it to view the Kafka cluster and topic.
