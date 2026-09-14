@@ -1,0 +1,106 @@
+WEEK–5: Synchronous and Asynchronous Kafka Producer
+
+Aim: Implement sending messages both synchronously and asynchronously in a Kafka producer.
+
+1. Start Kafka
+docker-compose up -d
+
+The Java producer must use 127.0.0.1:9093, because this is the host listener specified in the document.
+
+2. AsyncProducer.java
+package com.example.kafka;
+
+import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.common.serialization.StringSerializer;
+import java.util.*;
+
+public class AsyncProducer {
+ public static void main(String[] args) {
+  Properties p=new Properties();
+  p.put("bootstrap.servers","127.0.0.1:9093");
+  p.put("key.serializer",StringSerializer.class.getName());
+  p.put("value.serializer",StringSerializer.class.getName());
+
+  KafkaProducer<String,String> producer=new KafkaProducer<>(p);
+
+  for(int i=1;i<=5;i++)
+   producer.send(new ProducerRecord<>("demo-topic",
+    "async-key-"+i,"async-message-"+i),
+    (m,e)->System.out.println("Sent async: "+m.offset()));
+
+  producer.flush();
+
+  for(int i=1;i<=5;i++)
+   try {
+    RecordMetadata m=producer.send(
+     new ProducerRecord<>("demo-topic",
+     "sync-key-"+i,"sync-message-"+i)).get();
+    System.out.println("Sent sync: "+m.offset());
+   } catch(Exception e){System.out.println("Failed");}
+
+  producer.close();
+  System.out.println("All messages sent successfully!");
+ }
+}
+
+This demonstrates both asynchronous send() with callback and synchronous send().get(), as required by Week-5.
+
+3. SyncProducer.java
+package com.example.kafka;
+
+import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.common.serialization.StringSerializer;
+import java.util.*;
+
+public class SyncProducer {
+ public static void main(String[] args) {
+  Properties p=new Properties();
+  p.put("bootstrap.servers","127.0.0.1:9093");
+  p.put("key.serializer",StringSerializer.class.getName());
+  p.put("value.serializer",StringSerializer.class.getName());
+
+  KafkaProducer<String,String> producer=new KafkaProducer<>(p);
+
+  for(int i=1;i<=10;i++)
+   try {
+    RecordMetadata m=producer.send(
+     new ProducerRecord<>("demo-topic",
+     "sync-key-"+i,"sync-message-"+i)).get();
+    System.out.println("Sent sync: "+m.offset());
+   } catch(Exception e){System.out.println("Failed");}
+
+  producer.close();
+  System.out.println("All synchronous messages sent successfully!");
+ }
+}
+
+This follows the document's separate synchronous producer, which sends 10 messages using blocking send().get().
+
+4. Compile and Run
+
+From the kafka-producer-demo folder:
+
+mvn clean package
+
+Run asynchronous producer:
+
+java -jar target/kafka-producer-demo-1.0-SNAPSHOT-shaded.jar
+
+Run synchronous producer:
+
+java -cp target/kafka-producer-demo-1.0-SNAPSHOT-shaded.jar com.example.kafka.SyncProducer
+
+These are the corrected execution commands given in the PDF.
+
+Expected Output
+Sent async: 20
+Sent async: 21
+Sent async: 22
+Sent async: 23
+Sent async: 24
+Sent sync: 25
+Sent sync: 26
+Sent sync: 27
+Sent sync: 28
+Sent sync: 29
+All messages sent successfully!
