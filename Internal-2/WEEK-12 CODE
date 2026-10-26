@@ -1,0 +1,250 @@
+Week 12 — Simplified Lab Procedure
+Step 1: Create the project folder
+Open the Ubuntu terminal and execute:
+docker-compose down
+mkdir Week-12
+cd Week-12
+
+
+If you already have a Week-12 folder, use cd Week-12 instead of creating it again.
+Step 2: Create the Hadoop configuration file
+nano hadoop.env
+
+
+Paste the following:
+CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+CORE_CONF_hadoop_http_staticuser_user=root
+CORE_CONF_io_compression_codecs=org.apache.hadoop.io.compress.SnappyCodec
+HDFS_CONF_dfs_webhdfs_enabled=true
+HDFS_CONF_dfs_permissions_enabled=false
+HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check=false
+
+
+Save the file: press Ctrl + O, Enter, then Ctrl + X.
+Step 3: Create the Docker Compose file
+nano docker-compose.yml
+
+
+Paste the complete, simplified configuration below. It includes ZooKeeper, Kafka, NameNode, DataNode, and Kafka Connect.
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    environment:
+      CLUSTER_NAME: lab-cluster
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    volumes:
+      - namenode-data:/hadoop/dfs/name
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    depends_on:
+      - namenode
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./hadoop.env
+    volumes:
+      - datanode-data:/hadoop/dfs/data
+
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:7.4.0
+    hostname: kafka-connect
+    container_name: kafka-connect
+    depends_on:
+      - kafka
+      - namenode
+      - datanode
+    ports:
+      - "8083:8083"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: connect-cluster
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: connect-status
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components
+    command:
+      - bash
+      - -c
+      - |
+        confluent-hub install --no-prompt confluentinc/kafka-connect-hdfs:latest
+        /etc/confluent/docker/run
+
+volumes:
+  namenode-data:
+  datanode-data:
+
+
+
+Save with Ctrl + O → Enter → Ctrl + X.
+Step 4: Start all containers
+docker compose up -d
+
+
+Wait for the containers to start, then run:
+docker ps
+
+
+You should see five containers:
+- zookeeper
+- kafka
+- namenode
+- datanode
+- kafka-connect
+If your Ubuntu system uses the older Compose command, use docker-compose instead of docker compose.
+Step 5: Check that HDFS is working
+docker exec namenode hdfs dfsadmin -report
+
+
+Look for:
+Live datanodes (1)
+
+
+You can also open the Hadoop NameNode page in your browser:
+
+http://localhost:9870
+Step 6: Check the Kafka Connect HDFS connector
+Wait about 1–2 minutes for the connector installation.
+
+Run:
+curl -s http://localhost:8083/connector-plugins
+
+
+Look for:
+io.confluent.connect.hdfs.HdfsSinkConnector
+
+
+If it is missing, check the Connect container logs:
+docker logs kafka-connect
+
+
+Step 7: Create the Kafka topic
+docker exec kafka kafka-topics --create --topic hdfs-topic --partitions 1 --replication-factor 1 --bootstrap-server kafka:9092
+
+
+Expected output:
+Created topic hdfs-topic.
+
+
+If the topic already exists, you can continue.
+Step 8: Create the HDFS Sink configuration
+nano hdfs-sink.json
+
+
+Paste this JSON:
+
+{
+  "name": "hdfs-sink",
+  "config": {
+    "connector.class": "io.confluent.connect.hdfs.HdfsSinkConnector",
+    "tasks.max": "1",
+    "topics": "hdfs-topic",
+    "hdfs.url": "hdfs://namenode:9000",
+    "flush.size": "3",
+    "format.class": "io.confluent.connect.hdfs.json.JsonFormat",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+    "topics.dir": "/topics",
+    "logs.dir": "/logs",
+    "confluent.topic.bootstrap.servers": "kafka:9092",
+    "confluent.topic.replication.factor": "1"
+  }
+}
+
+
+
+Save using Ctrl + O → Enter → Ctrl + X.
+Step 9: Register the connector
+Run:
+curl -X POST -H "Content-Type: application/json" --data @hdfs-sink.json http://localhost:8083/connectors
+
+
+Check the status:
+curl -s http://localhost:8083/connectors/hdfs-sink/status
+
+
+Expected result should contain:
+"state":"RUNNING"
+
+
+The task should also show "state":"RUNNING".
+Step 10: Send three records to Kafka
+Copy and run this entire command:
+printf '{"id":1,"name":"Ravi"}\n{"id":2,"name":"Anitha"}\n{"id":3,"name":"Kiran"}\n' | docker exec -i kafka kafka-console-producer --topic hdfs-topic --bootstrap-server kafka:9092
+
+
+This sends three JSON records to the hdfs-topic topic. The Kafka Connect sink should transfer them to HDFS.
+Step 11: Check the files in HDFS
+Wait about 10–30 seconds, then execute:
+docker exec namenode hdfs dfs -ls -R /topics
+
+
+You should find a path similar to:
+/topics/hdfs-topic/partition=0/
+
+
+Inside that folder, look for a .json file.
+Step 12: Display the stored records
+Run this command to read the JSON file directly from HDFS:
+docker exec namenode bash -c 'hdfs dfs -cat /topics/hdfs-topic/partition=0/*.json'
+
+
+Expected output:
+{"id":1,"name":"Ravi"}
+{"id":2,"name":"Anitha"}
+{"id":3,"name":"Kiran"}
+
+
+This is the main proof of successful execution: the records sent to Kafka have been stored in HDFS.
+Step 13: Stop the lab
+After confirming the output, delete the connector and stop the containers.
+curl -X DELETE http://localhost:8083/connectors/hdfs-sink
+docker compose down
+
+
+Use docker-compose down if that is the command supported by your Ubuntu system.
+Result
+Kafka was integrated with the Hadoop ecosystem using Kafka Connect and the HDFS Sink connector. Three JSON records were produced to the Kafka topic hdfs-topic and successfully stored in HDFS.
