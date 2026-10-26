@@ -1,0 +1,262 @@
+Part 1: Kafka basics and installation
+1. What is Apache Kafka?
+
+Apache Kafka is a distributed event-streaming platform used to send, receive, and store real-time data.
+
+2. What is Kafka used for?
+
+It is used for real-time messaging, log collection, data pipelines, and stream processing.
+
+3. What is a Kafka broker?
+
+A broker is a Kafka server that stores messages and handles producer and consumer requests.
+
+4. What is a Kafka cluster?
+
+A Kafka cluster is a group of one or more brokers working together.
+
+5. What is a topic in Kafka?
+
+A topic is a named category where messages are stored.
+
+6. What is a partition?
+
+A partition is a subdivision of a topic that stores messages in an ordered sequence.
+
+7. What is an offset?
+
+An offset is the position number of a message within a partition.
+
+8. What is a producer?
+
+A producer is an application that sends messages to Kafka topics.
+
+9. What is a consumer?
+
+A consumer is an application that reads messages from Kafka topics.
+
+10. What is ZooKeeper?
+
+ZooKeeper is a coordination service used by older Kafka setups, including the Kafka 7.4 configuration in your lab. Newer Kafka versions can run without ZooKeeper using KRaft mode.
+Part 2: Basic Kafka operations and cluster setup
+11. What is a single-broker cluster?
+
+A Kafka cluster containing only one broker.
+
+12. What is a multi-broker cluster?
+
+A Kafka cluster containing multiple brokers that can distribute partitions across servers.
+
+13. What is the difference between a topic and a partition?
+
+A topic is a message category; a partition is a part of that topic.
+
+14. What is replication factor?
+
+It specifies the number of copies of a partition maintained across brokers.
+
+15. What is the difference between a leader and a follower?
+
+The leader handles normal read/write requests for a partition; followers replicate the leader's data.
+
+16. What happens if a broker fails?
+
+If a suitable replica exists, Kafka can elect a new leader. Without another available replica, that partition may become unavailable.
+
+17. What is fault tolerance?
+
+Fault tolerance is the ability of a system to continue operating despite component failures.
+
+18. What is a consumer group?
+
+A group of consumers that share the work of reading topic partitions.
+
+19. What is the command to create a topic?
+kafka-topics --create --topic test --bootstrap-server localhost:9092
+
+
+20. What is the command to list topics?
+kafka-topics --list --bootstrap-server localhost:9092
+
+
+21. How do you produce messages from the terminal?
+kafka-console-producer --topic test --bootstrap-server localhost:9092
+
+
+22. How do you consume messages from the terminal?
+kafka-console-consumer --topic test --from-beginning --bootstrap-server localhost:9092
+
+
+23. How do you delete a topic?
+kafka-topics --delete --topic test --bootstrap-server localhost:9092
+
+
+24. How do you create a topic with partitions and replication?
+kafka-topics --create --topic test --partitions 3 --replication-factor 1 --bootstrap-server localhost:9092
+
+
+25. Can the replication factor be greater than the number of brokers?
+
+No. The replication factor cannot exceed the number of available brokers when creating a topic.
+Part 3: Java producer and consumer
+26. Which Java class is used to create a Kafka producer?
+
+KafkaProducer
+
+27. Which Java class is used to create a Kafka consumer?
+
+KafkaConsumer
+
+28. What is ProducerRecord?
+
+It represents a message to be sent to a Kafka topic.
+
+29. What is bootstrap.servers?
+
+It specifies the Kafka broker addresses used to establish the initial connection.
+
+30. What is synchronous message sending?
+
+The producer waits for the send operation's result before proceeding.
+
+31. What is asynchronous message sending?
+
+The producer sends a message without waiting for the result immediately and can use a callback to handle completion.
+
+32. What is the difference between synchronous and asynchronous sending?
+
+Synchronous sending waits for the result; asynchronous sending allows other work to continue while the send completes.
+
+33. What is acks in Kafka?
+
+It specifies the acknowledgment level required from the broker for a producer request.
+
+34. What is subscribe() in a Kafka consumer?
+
+It subscribes the consumer to one or more topics.
+
+35. What is polling in Kafka?
+
+poll() retrieves available records from the broker.
+Part 4: Kafka configurations and fault tolerance
+36. What is the purpose of topic configuration?
+
+It controls topic properties such as retention, cleanup policy, and partition settings.
+
+37. What is retention period?
+
+The duration for which Kafka keeps messages before deleting them according to its retention policy.
+
+38. What is a replication leader election?
+
+It is the process of selecting a replica to become the leader of a partition.
+
+39. What is the difference between replication and partitioning?
+
+Partitioning divides data into parts; replication creates copies of partition data.
+
+40. What is the purpose of kafka-topics --describe?
+
+It displays topic details, including partitions, leaders, replicas, and in-sync replicas.
+Part 5: Kafka Connect
+41. What is Kafka Connect?
+
+Kafka Connect is a framework for transferring data between Kafka and external systems.
+
+42. What are source and sink connectors?
+- Source connector: Imports data into Kafka.
+- Sink connector: Exports data from Kafka to another system.
+43. What is an HDFS Sink connector?
+
+It transfers Kafka topic records into Hadoop Distributed File System (HDFS).
+
+44. What is the purpose of flush.size in your experiment?
+
+It specifies how many records trigger a file commit. In your lab, flush.size: 3 means the connector commits a file after three records, subject to the connector's operation and configuration.
+
+45. What is the purpose of hdfs.url?
+
+It specifies the HDFS destination address, such as hdfs://namenode:9000.
+Part 6: Kafka Streams and Hadoop integration
+46. What is Kafka Streams?
+
+Kafka Streams is a Java library for processing and analyzing data streams from Kafka topics.
+
+47. What is a word count application?
+
+It counts how many times each word appears in the input text.
+
+48. What is Hadoop?
+
+Hadoop is a framework for distributed storage and processing of large datasets.
+
+49. What is HDFS?
+
+HDFS stands for Hadoop Distributed File System. It stores large files across multiple machines.
+
+50. Explain your Week 12 experiment.
+
+Kafka receives three JSON records through the hdfs-topic topic. Kafka Connect with the HDFS Sink connector transfers those records into HDFS. We verify the result by listing and reading the files stored under /topics/hdfs-topic/partition=0/.
+
+Last-minute revision: 10 things to remember
+Term	One-line answer
+Kafka	Real-time event streaming
+Broker	Kafka server
+Topic	Message category
+Partition	Topic subdivision
+Offset	Message position
+Producer	Sends messages
+Consumer	Reads messages
+ZooKeeper	Coordination in older Kafka setups
+Kafka Connect	Connects Kafka with external systems
+HDFS	Distributed file storage
+
+My advice: Learn Questions 1–10, 14–17, 19–24, 30–35, and 41–50 first. They cover the core concepts, commands, and the practical steps of your Week 12 experiment that an external examiner may ask you to explain.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Just give simple 3-4 lines answer for
+
+i) what is Kafka?
+
+iⅱ) what is zookeeper?
+
+iii) what is docker?
+
+
+
+
+
+
+
+
+
+
+
+
+
+i) What is Kafka?
+- Apache Kafka is a distributed event-streaming platform.
+- It is used to send, receive, and store real-time data.
+- It uses producers to send messages and consumers to read messages.
+ii) What is ZooKeeper?
+- ZooKeeper is a coordination service.
+- It manages coordination between Kafka brokers in older Kafka setups.
+- It helps maintain cluster configuration and broker information.
+iii) What is Docker?
+- Docker is a platform used to run applications in containers.
+- Containers provide an isolated environment for applications.
+- It makes applications easy to deploy and run across different systems.
