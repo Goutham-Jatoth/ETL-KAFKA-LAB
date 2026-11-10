@@ -1,0 +1,210 @@
+i) What is Kafka?
+Apache Kafka is an open-source distributed event streaming platform used to collect, store, and process large amounts of real-time data.
+
+It allows different applications and systems to communicate with each other by sending and receiving messages quickly.
+
+Features of Kafka:
+1. High Speed: Handles large amounts of data very quickly.
+2. Scalability: Can handle increasing amounts of data.
+3. Fault Tolerance: Continues working even if some servers fail.
+4. Real-Time Processing: Processes data as soon as it is received.
+5. Distributed System: Data is distributed across multiple servers.
+Applications of Kafka:
+- Real-time data processing.
+- Banking transactions.
+- Website activity tracking.
+- Log monitoring.
+- Messaging systems.
+Example: In an online shopping application, Kafka can collect real-time information about customer orders, payments, and deliveries.
+
+
+
+ii) What is ZooKeeper?
+Apache ZooKeeper is an open-source coordination service used to manage and coordinate distributed applications.
+
+It helps different servers communicate with each other and maintains information about the status of servers in a distributed system.
+
+Functions of ZooKeeper:
+1. Configuration Management: Stores configuration information required by applications.
+2. Synchronization: Coordinates activities between multiple servers.
+3. Leader Election: Selects one server as the leader among multiple servers.
+4. Naming Service: Helps applications identify and locate servers.
+5. Fault Management: Helps detect server failures and manage system coordination.
+Applications of ZooKeeper:
+- Distributed systems management.
+- Server coordination.
+- Configuration management.
+- Leader election.
+- Cluster management.
+Example: In a distributed system with five servers, ZooKeeper helps select one server as the leader and coordinates the activities of the remaining servers.
+
+
+iii) What is Docker?
+Docker is an open-source platform used to develop, package, and run applications inside containers.
+
+A container contains an application along with all the required libraries, dependencies, and configuration files.
+
+Docker makes it easy to run the same application on different computers without compatibility problems.
+
+Features of Docker:
+1. Portability: Applications can run on different systems.
+2. Lightweight: Containers use fewer resources than virtual machines.
+3. Isolation: Each container runs independently.
+4. Scalability: Multiple containers can be created when needed.
+5. Easy Deployment: Applications can be easily packaged and deployed.
+Important Components of Docker:
+1. Docker Image: A read-only template used to create containers.
+2. Docker Container: A running instance of a Docker image.
+3. Dockerfile: A file containing instructions to build a Docker image.
+4. Docker Hub: An online platform used to store and share Docker images.
+5. Docker Engine: The software responsible for building and running containers.
+Applications of Docker:
+- Application development.
+- Software testing.
+- Cloud computing.
+- Microservices architecture.
+- Application deployment.
+Example: A developer creates a Python application and packages it with all required libraries using Docker. The application can then run on another computer without installing those libraries separately.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Aim: To integrate Kafka with Hadoop and store Kafka messages in HDFS using Docker.
+
+Concept: Kafka collects real-time data, and Hadoop HDFS stores the data.
+1. Requirements
+- Docker Desktop
+- Docker Compose
+- Internet connection
+2. Procedure
+Step 1: Create a folder named Week-12.
+
+Step 2: Create a file named hadoop.env
+
+3. Program
+File 1: hadoop.env
+CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+CORE_CONF_hadoop_http_staticuser_user=root
+HDFS_CONF_dfs_webhdfs_enabled=true
+HDFS_CONF_dfs_permissions_enabled=false
+HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check=false
+
+File 2: docker-compose.yml
+version: '3.8'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:7.4.0
+
+Step 3: Start all containers.
+docker-compose up -d
+docker ps
+
+
+Step 4: Check Hadoop DataNode.
+docker exec namenode hdfs dfsadmin -report
+
+
+Output:
+Live datanodes (1):
+
+
+Step 5: Check HDFS connector.
+curl http://localhost:8083/connector-plugins
+
+
+Expected connector:
+io.confluent.connect.hdfs.HdfsSinkConnector
+
+
+Step 6: Create Kafka topic.
+docker exec kafka kafka-topics --create --topic hdfs-topic --partitions 1 --replication-factor 1 --bootstrap-server localhost:9092
+
+
+Output:
+Created topic hdfs-topic.
+
+
+File 3: hdfs-sink.json
+{
+  "name": "hdfs-sink",
+  "config": {
+    "connector.class": "io.confluent.connect.hdfs.HdfsSinkConnector",
+    "topics": "hdfs-topic",
+    "hdfs.url": "hdfs://namenode:9000",
+    "flush.size": "3",
+    "topics.dir": "/topics",
+    "logs.dir": "/logs",
+    "confluent.topic.bootstrap.servers": "kafka:9092",
+    "confluent.topic.replication.factor": "1"
+  }
+}
+
+
+Step 7: Register the connector.
+curl -X POST -H "Content-Type: application/json" --data @hdfs-sink.json http://localhost:8083/connectors
+
+
+Check status:
+curl http://localhost:8083/connectors/hdfs-sink/status
+
+
+Output:
+"state":"RUNNING"
+
+
+Step 8: Send three records to Kafka.
+printf '{"id":1,"name":"Ravi"}\n{"id":2,"name":"Anitha"}\n{"id":3,"name":"Kiran"}\n' | docker exec -i kafka kafka-console-producer --topic hdfs-topic --bootstrap-server localhost:9092
+
+
+Step 9: Check files stored in HDFS.
+docker exec namenode hdfs dfs -ls -R /topics
+
+
+Output:
+/topics/hdfs-topic
+/topics/hdfs-topic/partition=0
+/topics/hdfs-topic/partition=0/hdfs-topic+0+0000000000+0000000002.json
+
+
+Step 10: Read the stored data.
+docker exec namenode hdfs dfs -cat /topics/hdfs-topic/partition=0/hdfs-topic+0+0000000000+0000000002.json
+
+
+Expected Output
+{"id":1,"name":"Ravi"}
+{"id":2,"name":"Anitha"}
+{"id":3,"name":"Kiran"}
+
+
+Step 11: Stop all containers.
+curl -X DELETE http://localhost:8083/connectors/hdfs-sink
+
+docker-compose down
+
+
+Result
+Thus, Kafka was successfully integrated with Hadoop using Docker. Three JSON records were sent through Kafka and stored in HDFS.
+
+Most important output to remember:
+Live datanodes (1):
+"state":"RUNNING"
+{"id":1,"name":"Ravi"}
+{"id":2,"name":"Anitha"}
+{"id":3,"name":"Kiran"}
