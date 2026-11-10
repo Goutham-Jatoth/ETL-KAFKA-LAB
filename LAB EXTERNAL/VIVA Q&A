@@ -1,0 +1,106 @@
+Experiment 12: Kafka Integration with the Hadoop Ecosystem
+Experiment 12
+ External Viva Preparation
+
+
+Aim: To implement Kafka integration with the Hadoop ecosystem for transferring and processing large amounts of data.
+Viva Questions and Answers
+1. What is Hadoop?
+
+Hadoop is an open-source framework used to store and process large amounts of data across multiple computers.
+
+2. What is the Hadoop ecosystem?
+
+The Hadoop ecosystem is a collection of tools such as HDFS, MapReduce, YARN, Hive and HBase used for big data processing.
+
+3. What is Apache HDFS?
+
+HDFS stands for Hadoop Distributed File System, which stores large files across multiple machines.
+
+4. What is MapReduce?
+
+MapReduce is a programming model used to process large datasets in parallel.
+
+5. What is the role of Kafka in Hadoop integration?
+
+Kafka collects and transfers real-time data, which can then be stored and processed using Hadoop tools.
+
+6. Why do we integrate Kafka with Hadoop?
+
+We integrate them to combine real-time data streaming with large-scale data storage and batch processing.
+
+7. What is big data?
+
+Big data refers to extremely large and complex datasets that require special tools for storage and processing.
+
+8. What are the 5 Vs of big data?
+
+The 5 Vs are Volume, Velocity, Variety, Veracity and Value.
+
+9. What is the difference between Kafka and Hadoop?
+
+Kafka is mainly used for real-time data streaming, whereas Hadoop is mainly used for distributed storage and large-scale data processing.
+
+10. What is HDFS used for?
+
+HDFS is used to store large files across multiple machines with distributed storage.
+
+11. What is YARN?
+
+YARN stands for Yet Another Resource Negotiator, which manages resources and schedules applications in Hadoop.
+
+12. What is Apache Hive?
+
+Hive is a data warehouse tool used to query and analyze large datasets stored in Hadoop.
+
+13. What is Apache HBase?
+
+HBase is a distributed NoSQL database that provides real-time read and write access to large datasets.
+
+14. How does Kafka send data to Hadoop?
+
+Kafka data can be transferred to Hadoop using Kafka Connect, HDFS Sink Connectors or custom integration applications.
+
+15. What is Kafka Connect HDFS Sink Connector?
+
+It is a connector that reads messages from Kafka topics and writes them into HDFS.
+
+16. What is batch processing?
+
+Batch processing means collecting data and processing it in groups at scheduled times.
+
+17. What is stream processing?
+
+Stream processing means continuously processing data as it arrives.
+
+18. What is the difference between batch and stream processing?
+
+Batch processing handles collected data in groups, whereas stream processing handles data continuously.
+
+19. What is data ingestion?
+
+Data ingestion is the process of collecting and importing data from different sources into a storage or processing system.
+
+20. What is distributed storage?
+
+Distributed storage means storing data across multiple computers instead of a single machine.
+
+21. What is fault tolerance in HDFS?
+
+HDFS provides fault tolerance by maintaining multiple copies of data blocks across different machines.
+
+22. What is a data pipeline?
+
+A data pipeline is a sequence of steps used to collect, transfer, process and store data.
+
+23. What is the advantage of using Kafka with Hadoop?
+
+It combines Kafka's real-time data streaming with Hadoop's distributed storage and large-scale processing capabilities.
+
+24. Give one real-time application of Kafka and Hadoop integration.
+
+In banking, Kafka collects transaction events in real time, while Hadoop stores and analyzes large volumes of transaction data.
+
+25. What is the output of this experiment?
+
+Data is transferred from Kafka into the Hadoop ecosystem for distributed storage and further processing.
