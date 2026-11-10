@@ -1,0 +1,1180 @@
+Experiment 1: Install Apache Kafka on a Single Node
+Experiment 1
+ Viva Preparation
+
+Viva Questions and Answers
+1. What is Apache Kafka?
+
+Apache Kafka is an open-source distributed event streaming platform used to publish, store and process real-time data.
+
+2. What is the main purpose of Kafka?
+
+Kafka is used to transfer large amounts of data between applications quickly and reliably.
+
+3. Who developed Apache Kafka?
+
+Apache Kafka was originally developed at LinkedIn and later became an Apache Software Foundation project.
+
+4. What is a single-node Kafka setup?
+
+A single-node setup means running Kafka on one computer or machine.
+
+5. What is a broker in Kafka?
+
+A broker is a Kafka server that stores messages and handles producer and consumer requests.
+
+6. What is Zookeeper in Kafka?
+
+Zookeeper is a coordination service used by older Kafka architectures to manage brokers and cluster metadata.
+
+7. Is Zookeeper compulsory in the latest Kafka versions?
+
+No. Modern Kafka versions support KRaft mode, which manages metadata without Zookeeper.
+
+8. What is KRaft?
+
+KRaft stands for Kafka Raft Metadata mode, which allows Kafka to manage its metadata internally.
+
+9. What are the prerequisites for installing Kafka?
+
+Java and the Apache Kafka distribution are the basic requirements for setting up Kafka.
+
+10. What is the role of Java in Kafka?
+
+Kafka is developed using Java and Scala, and Java is required to run its server and Java applications.
+
+11. What is a Kafka cluster?
+
+A Kafka cluster is a group of one or more Kafka brokers working together.
+
+12. What is a topic in Kafka?
+
+A topic is a logical category or name used to store and organize messages.
+
+13. What is a producer?
+
+A producer is an application that sends messages to a Kafka topic.
+
+14. What is a consumer?
+
+A consumer is an application that reads messages from a Kafka topic.
+
+15. What is the default Kafka port?
+
+The commonly used default Kafka broker port is 9092.
+
+16. What is the purpose of the Kafka server?
+
+The Kafka server receives messages from producers, stores them and delivers them to consumers.
+
+17. What is a message in Kafka?
+
+A message is a unit of data sent by a producer and stored in a Kafka topic.
+
+18. What is the difference between Kafka and a traditional messaging system?
+
+Kafka stores messages durably and supports high-throughput distributed streaming, whereas traditional messaging systems often focus on message delivery.
+
+19. What is the Kafka configuration file?
+
+It is a properties file that contains settings such as broker ID, port, log directories and network configuration.
+
+20. What are the advantages of Apache Kafka?
+
+Kafka provides high throughput, scalability, fault tolerance, durability and real-time data processing.
+
+
+
+
+
+
+Experiment 2: Setting Up a Single-Node, Single-Broker Kafka Cluster
+Experiment 2
+ External Viva Preparation
+
+
+Aim: To set up a single-node, single-broker Kafka cluster and perform basic operations such as creating topics, producing messages and consuming messages.
+Viva Questions and Answers
+1. What is a Kafka cluster?
+
+A Kafka cluster is a group of one or more Kafka brokers working together to manage and distribute messages.
+
+2. What is a single-broker cluster?
+
+It is a Kafka cluster that contains only one broker (server).
+
+3. What is the difference between a node and a broker?
+
+A node is a machine or server, whereas a broker is a Kafka server process running on that machine.
+
+4. What is a Kafka topic?
+
+A topic is a logical channel used to organize and store messages in Kafka.
+
+5. How do you create a topic in Kafka?
+
+We use the kafka-topics.sh command with the --create option.
+
+6. What is the command to create a topic?
+
+kafka-topics.sh --create --topic mytopic --bootstrap-server localhost:9092
+
+7. What is the purpose of the bootstrap server?
+
+It provides the broker address and port through which producers and consumers connect to Kafka.
+
+8. What is the command to list all topics?
+
+kafka-topics.sh --list --bootstrap-server localhost:9092
+
+9. What is a Kafka producer?
+
+A producer is an application that publishes or sends messages to a Kafka topic.
+
+10. How do you produce messages using the command line?
+
+We use the kafka-console-producer.sh command to send messages to a topic.
+
+11. What is the producer command?
+
+kafka-console-producer.sh --topic mytopic --bootstrap-server localhost:9092
+
+12. What is a Kafka consumer?
+
+A consumer is an application that reads messages from Kafka topics.
+
+13. How do you consume messages from a topic?
+
+We use the kafka-console-consumer.sh command to read messages.
+
+14. What is the consumer command?
+
+kafka-console-consumer.sh --topic mytopic --from-beginning --bootstrap-server localhost:9092
+
+15. What is the purpose of --from-beginning?
+
+It allows the consumer to read available messages from the beginning of the topic.
+
+16. What is the difference between a producer and a consumer?
+
+A producer sends messages to Kafka, whereas a consumer receives messages from Kafka.
+
+17. What is a partition in Kafka?
+
+A partition is a smaller division of a topic that helps Kafka store and process messages efficiently.
+
+18. What is an offset in Kafka?
+
+An offset is a unique sequential number assigned to each message within a partition.
+
+19. What happens when we send multiple messages to a topic?
+
+Kafka stores the messages in the topic's partitions in the order they are appended.
+
+20. Can multiple consumers read the same topic?
+
+Yes, multiple consumers can read the same topic independently, depending on their consumer group configuration.
+
+21. What is the default number of partitions in a topic?
+
+The default number of partitions is generally 1 unless changed through configuration or command options.
+
+22. What is the purpose of --describe?
+
+It displays topic details such as partition count, replication factor and leader information.
+
+23. What is replication factor?
+
+Replication factor specifies how many copies of a partition are maintained across brokers.
+
+24. What is the output of this experiment?
+
+A Kafka topic is created successfully, messages are produced into it and the consumer displays those messages.
+
+25. Why do we use Kafka in real-time applications?
+
+Kafka is used for real-time data streaming, log collection, monitoring and communication between applications.
+
+
+
+
+Experiment 3: Extend the Kafka Cluster to Multiple Brokers on a Single Node
+Experiment 3
+ External Viva Preparation
+
+
+Aim: To extend a Kafka cluster by running multiple brokers on a single machine.
+Viva Questions and Answers
+1. What is a multi-broker Kafka cluster?
+
+A multi-broker cluster is a Kafka cluster containing two or more brokers working together.
+
+2. Can multiple Kafka brokers run on a single machine?
+
+Yes, multiple brokers can run on one machine by using different ports, broker IDs and log directories.
+
+3. Why do we use multiple brokers?
+
+Multiple brokers improve scalability, load distribution and fault tolerance.
+
+4. What is a broker ID?
+
+A broker ID is a unique numerical identifier assigned to each Kafka broker.
+
+5. Can two brokers have the same broker ID?
+
+No, every broker in a Kafka cluster must have a unique broker ID.
+
+6. Why do we use different ports for multiple brokers?
+
+Different ports allow multiple broker processes to communicate separately on the same machine.
+
+7. What is a log directory in Kafka?
+
+A log directory is the location where Kafka stores topic partitions and message data.
+
+8. Why should each broker have a separate log directory?
+
+It prevents data conflicts and keeps each broker's stored data separate.
+
+9. What is replication in Kafka?
+
+Replication means maintaining copies of partition data on multiple brokers.
+
+10. What is a leader replica?
+
+A leader replica handles read and write requests for a particular partition.
+
+11. What is a follower replica?
+
+A follower replica copies data from the leader and can take over if the leader fails.
+
+12. What is the replication factor?
+
+It specifies the total number of copies of a partition maintained across brokers.
+
+13. What happens if the replication factor is 2?
+
+Kafka maintains two copies of each partition, provided at least two brokers are available.
+
+14. What is fault tolerance?
+
+Fault tolerance is the ability of a system to continue working even when some components fail.
+
+15. What is the difference between a single-broker and multi-broker cluster?
+
+A single-broker cluster has one broker, while a multi-broker cluster has multiple brokers for better scalability and fault tolerance.
+
+16. What is a controller in Kafka?
+
+The controller manages cluster metadata and coordinates administrative operations across brokers.
+
+17. What is KRaft mode?
+
+KRaft is Kafka's built-in metadata management mechanism that eliminates the need for Zookeeper.
+
+18. What is the purpose of server.properties?
+
+It stores broker configuration settings such as broker ID, port, log directory and replication settings.
+
+19. Can a Kafka cluster work if one broker fails?
+
+Yes, if the required partition replicas are available on other brokers, the cluster can continue serving requests.
+
+20. What happens when all brokers run on the same machine and that machine fails?
+
+The entire cluster becomes unavailable because all brokers depend on the same physical machine.
+
+21. What is load balancing in Kafka?
+
+Load balancing means distributing partitions and workloads across multiple brokers.
+
+22. What is an ISR in Kafka?
+
+ISR stands for In-Sync Replicas, which are replicas that are sufficiently synchronized with the partition leader.
+
+23. What is the advantage of replication?
+
+Replication improves data availability and helps prevent data loss when a broker fails.
+
+24. Is running multiple brokers on one machine true fault tolerance?
+
+No, because a machine failure can stop all brokers running on that machine.
+
+25. What is the output of this experiment?
+
+Multiple Kafka brokers run successfully on one machine and work together as a single Kafka cluster.
+
+
+
+
+Experiment 4: Java Program to Create a Kafka Producer and Produce Messages to a Topic
+Experiment 4
+ External Viva Preparation
+
+
+Aim: To write a Java program that creates a Kafka producer and sends messages to a Kafka topic.
+Viva Questions and Answers
+1. What is a Kafka producer?
+
+A Kafka producer is an application that sends messages or data to Kafka topics.
+
+2. Which programming language is used in this experiment?
+
+Java is used to create the Kafka producer application.
+
+3. What is KafkaProducer?
+
+KafkaProducer is a Java class used to send messages to Kafka brokers.
+
+4. What is Kafka API?
+
+Kafka API provides classes and methods that allow applications to communicate with Kafka.
+
+5. What is ProducerRecord?
+
+ProducerRecord represents a message that a producer wants to send to a Kafka topic.
+
+6. What is the purpose of bootstrap.servers?
+
+It specifies the address and port of Kafka brokers to which the producer connects.
+
+7. What is the purpose of key.serializer?
+
+It converts message keys into bytes before sending them to Kafka.
+
+8. What is the purpose of value.serializer?
+
+It converts message values into bytes before sending them to Kafka.
+
+9. What is serialization?
+
+Serialization is the process of converting data into a byte format for transmission or storage.
+
+10. Which serializer is commonly used for String messages?
+
+StringSerializer is commonly used to convert string keys and values into bytes.
+
+11. What is the send() method?
+
+The send() method is used to send a message from the producer to a Kafka topic.
+
+12. What is the flush() method?
+
+The flush() method ensures that buffered messages are sent to the Kafka broker.
+
+13. What is the close() method?
+
+The close() method releases producer resources and closes the connection.
+
+14. What is the purpose of topic name in a producer program?
+
+The topic name specifies where the producer should send its messages.
+
+15. What is a message key in Kafka?
+
+A message key is an optional value used to identify or determine the partition for a message.
+
+16. What happens if the message key is null?
+
+Kafka generally uses its partitioning strategy to select a partition for the message.
+
+17. What is a callback in Kafka producer?
+
+A callback is a function that executes after a message send request completes, reporting success or failure.
+
+18. What is the role of Kafka broker in this program?
+
+The broker receives and stores the messages sent by the Java producer.
+
+19. What is the output of this experiment?
+
+The Java producer successfully sends messages to a Kafka topic, where they can be read by consumers.
+
+20. Why is KafkaProducer considered thread-safe?
+
+KafkaProducer is designed to be shared safely among multiple threads.
+
+21. What is the difference between a producer and a broker?
+
+A producer sends messages, whereas a broker receives and stores those messages.
+
+22. What is the role of Properties class in Java Kafka programming?
+
+The Properties class stores producer configuration settings such as broker address and serializers.
+
+23. What is StringSerializer?
+
+StringSerializer converts Java String data into bytes before sending it to Kafka.
+
+24. What is ProducerConfig?
+
+ProducerConfig provides predefined configuration property names for Kafka producers.
+
+25. What is the advantage of using Java with Kafka?
+
+Java provides Kafka client libraries that make it easy to build scalable and reliable data-producing applications.
+
+
+
+
+Experiment 5: Sending Messages Synchronously and Asynchronously in Kafka Producer
+Experiment 5
+ External Viva Preparation
+
+
+Aim: To implement sending messages to a Kafka topic using both synchronous and asynchronous producer methods.
+Viva Questions and Answers
+1. What is synchronous message sending?
+
+Synchronous sending means the producer waits for the broker's response before proceeding to the next operation.
+
+2. What is asynchronous message sending?
+
+Asynchronous sending means the producer sends a message without waiting for the broker's response immediately.
+
+3. What is the main difference between synchronous and asynchronous sending?
+
+Synchronous sending waits for confirmation, whereas asynchronous sending allows other operations to continue.
+
+4. Which method is used to send messages in Kafka?
+
+The send() method is used to send messages in both synchronous and asynchronous modes.
+
+5. How do we implement synchronous sending in Kafka?
+
+We use send().get() to wait for the broker's response.
+
+6. How do we implement asynchronous sending in Kafka?
+
+We use the send() method with a callback function.
+
+7. What is a callback in Kafka?
+
+A callback is a function that executes when the message sending operation succeeds or fails.
+
+8. What is Future in Java Kafka?
+
+Future represents the result of an asynchronous operation that may become available later.
+
+9. What is the purpose of get() method?
+
+The get() method waits for the operation to complete and retrieves its result.
+
+10. What is the advantage of synchronous sending?
+
+It provides immediate confirmation of whether a message was successfully sent or failed.
+
+11. What is the advantage of asynchronous sending?
+
+It improves performance because the producer does not need to wait for every message response.
+
+12. Which method is faster: synchronous or asynchronous?
+
+Asynchronous sending is generally faster for high-volume message production.
+
+13. What is the disadvantage of synchronous sending?
+
+It can reduce performance because the producer waits for broker confirmation after each send.
+
+14. What is the disadvantage of asynchronous sending?
+
+Error handling is more complex because the producer must handle failures through callbacks.
+
+15. What is RecordMetadata?
+
+RecordMetadata contains information about a successfully sent message, such as topic, partition and offset.
+
+16. What happens if a message fails to send?
+
+Kafka reports the failure through an exception or callback, depending on the sending method.
+
+17. What is the role of Exception in callback?
+
+It indicates whether the message sending operation failed.
+
+18. Can we send multiple messages asynchronously?
+
+Yes, a producer can send multiple messages without waiting for each individual response.
+
+19. What is the purpose of flush() in this experiment?
+
+It ensures that all buffered messages are sent before the producer closes.
+
+20. Which sending method is suitable for real-time applications?
+
+Asynchronous sending is generally preferred for high-throughput real-time applications.
+
+21. Does asynchronous mean messages are sent without any guarantee?
+
+No, Kafka still provides delivery guarantees based on producer configuration and acknowledgements.
+
+22. What is acknowledgement in Kafka?
+
+Acknowledgement is the confirmation received from the broker after processing a producer request.
+
+23. What does acks=0 mean?
+
+The producer does not wait for broker acknowledgement.
+
+24. What does acks=all mean?
+
+The producer waits for acknowledgement from all required in-sync replicas.
+
+25. What is the output of this experiment?
+
+Messages are successfully sent to the Kafka topic using both synchronous and asynchronous methods.
+
+
+
+
+Experiment 6: Java Program to Create a Kafka Consumer and Consume Messages
+Experiment 6
+ External Viva Preparation
+
+
+Aim: To develop a Java program that creates a Kafka consumer, subscribes to a topic and consumes messages.
+Viva Questions and Answers
+1. What is a Kafka consumer?
+
+A Kafka consumer is an application that reads messages from Kafka topics.
+
+2. Which Java class is used to create a Kafka consumer?
+
+The KafkaConsumer class is used to create a Kafka consumer.
+
+3. What is consumer.subscribe()?
+
+The subscribe() method is used to subscribe to one or more Kafka topics.
+
+4. What is consumer.poll()?
+
+The poll() method retrieves available messages from Kafka brokers.
+
+5. What is ConsumerRecord?
+
+ConsumerRecord represents an individual message received from a Kafka topic.
+
+6. What is ConsumerRecords?
+
+ConsumerRecords is a collection of messages received during a single poll operation.
+
+7. What is deserialization?
+
+Deserialization is the process of converting bytes back into readable data.
+
+8. Which deserializer is used for String messages?
+
+StringDeserializer is used to convert byte data into Java strings.
+
+9. What is group.id in Kafka?
+
+group.id identifies the consumer group to which a consumer belongs.
+
+10. What is a consumer group?
+
+A consumer group is a set of consumers that work together to read messages from topics.
+
+11. What is the purpose of bootstrap.servers in a consumer?
+
+It specifies the Kafka broker address used by the consumer to connect to the cluster.
+
+12. What is enable.auto.commit?
+
+It is a consumer configuration that enables automatic committing of offsets.
+
+13. What is an offset in Kafka consumer?
+
+An offset represents the position of a message within a partition.
+
+14. What is offset commit?
+
+Offset commit means saving the consumer's reading position so it can continue from that position later.
+
+15. What is auto commit?
+
+Auto commit automatically saves consumer offsets at configured intervals.
+
+16. What is manual commit?
+
+Manual commit means the consumer explicitly saves offsets using methods such as commitSync() or commitAsync().
+
+17. What is the difference between producer and consumer?
+
+A producer sends messages to Kafka, while a consumer reads messages from Kafka.
+
+18. Can multiple consumers read from the same topic?
+
+Yes, multiple consumers can read the same topic independently or share partitions within a consumer group.
+
+19. What happens if a consumer stops working?
+
+Kafka can reassign its partitions to other consumers in the same group.
+
+20. What is consumer.poll(Duration)?
+
+It waits for a specified duration and retrieves available messages from Kafka.
+
+21. What is consumer.close()?
+
+It closes the consumer and releases its resources.
+
+22. What is a rebalance in Kafka?
+
+Rebalancing is the process of redistributing topic partitions among consumers in a consumer group.
+
+23. What is the difference between subscribe() and assign()?
+
+subscribe() uses consumer group coordination, whereas assign() manually assigns partitions to a consumer.
+
+24. What is the purpose of StringDeserializer?
+
+It converts incoming byte data into readable Java strings.
+
+25. What is the output of this experiment?
+
+The Java consumer successfully subscribes to a Kafka topic and displays the messages produced to that topic.
+
+
+
+
+Experiment 7: Create a Kafka Topic with Specific Partition and Replication Factor Settings
+Experiment 7
+ External Viva Preparation
+
+
+Aim: To write a script to create a Kafka topic with a specific number of partitions and replication factor.
+Viva Questions and Answers
+1. What is a partition in Kafka?
+
+A partition is a division of a topic that allows Kafka to store and process messages efficiently.
+
+2. Why are partitions used in Kafka?
+
+Partitions help improve parallel processing, scalability and message distribution.
+
+3. What is replication factor?
+
+Replication factor specifies the number of copies of each partition maintained across Kafka brokers.
+
+4. What is the difference between partition and replication?
+
+Partition divides topic data into smaller parts, whereas replication creates copies of partition data.
+
+5. Which command is used to create a topic?
+
+The kafka-topics.sh --create command is used to create a topic.
+
+6. How do you specify the number of partitions?
+
+We use the --partitions option while creating a topic.
+
+7. How do you specify the replication factor?
+
+We use the --replication-factor option while creating a topic.
+
+8. What is the command to create a topic with 3 partitions and replication factor 2?
+
+kafka-topics.sh --create --topic mytopic --partitions 3 --replication-factor 2 --bootstrap-server localhost:9092
+
+9. Can replication factor be greater than the number of brokers?
+
+No, the replication factor cannot exceed the number of available brokers when creating a topic.
+
+10. What happens if we create a topic with 3 partitions?
+
+Kafka divides the topic into three partitions to distribute messages and support parallel processing.
+
+11. What is a leader replica?
+
+The leader replica handles read and write requests for a partition.
+
+12. What is a follower replica?
+
+A follower replica copies data from the leader to maintain another copy of the partition.
+
+13. What is the default replication factor?
+
+The commonly used default replication factor for automatically created topics is 1, unless configured differently.
+
+14. What happens if replication factor is 1?
+
+Only one copy of each partition exists, so there is no replica available for broker-level failover.
+
+15. What is the advantage of using replication factor 3?
+
+It maintains three copies of partition data, improving fault tolerance when brokers fail.
+
+16. Can we increase the number of partitions later?
+
+Yes, Kafka allows us to increase the number of partitions of an existing topic.
+
+17. Can we decrease the number of partitions directly?
+
+No, Kafka does not support directly decreasing the partition count of an existing topic.
+
+18. What is the purpose of --describe?
+
+It displays topic information such as partition count, leader, replicas and ISR.
+
+19. What is the purpose of --bootstrap-server?
+
+It specifies the Kafka broker address used to connect to the cluster.
+
+20. What is parallel processing in Kafka?
+
+Parallel processing means multiple partitions can be processed simultaneously by different consumers.
+
+21. Does increasing partitions always improve performance?
+
+No, too many partitions can increase resource usage and administrative overhead.
+
+22. What is ISR?
+
+ISR stands for In-Sync Replicas, which are replicas sufficiently synchronized with the leader.
+
+23. What is partition reassignment?
+
+Partition reassignment is the process of moving partition replicas between brokers.
+
+24. Why is replication important in Kafka?
+
+Replication improves data availability and protects against broker failures.
+
+25. What is the output of this experiment?
+
+A Kafka topic is successfully created with the specified number of partitions and replication factor.
+
+
+
+
+Viva Questions and Answers
+1. What is fault tolerance in Kafka?
+
+Fault tolerance is the ability of Kafka to continue working even when one or more brokers fail.
+
+2. What is broker failure?
+
+Broker failure occurs when a Kafka server stops working or becomes unavailable.
+
+3. What happens when one broker shuts down?
+
+Kafka detects the broker failure and may continue operating using available replicas on other brokers.
+
+4. What is replication in Kafka?
+
+Replication is the process of maintaining multiple copies of partition data across brokers.
+
+5. Why is replication important for fault tolerance?
+
+Replication helps protect data and maintain availability when a broker fails.
+
+6. What is a leader replica?
+
+A leader replica handles read and write requests for a partition.
+
+7. What is a follower replica?
+
+A follower replica copies data from the leader and can become the new leader if required.
+
+8. What is leader election?
+
+Leader election is the process of selecting a new leader replica when the existing leader fails.
+
+9. What is ISR in Kafka?
+
+ISR stands for In-Sync Replicas, which are replicas sufficiently synchronized with the partition leader.
+
+10. What happens if the leader broker fails?
+
+Kafka can elect another eligible in-sync replica as the new leader.
+
+11. What happens if a follower broker fails?
+
+The partition can continue operating through its leader, but replication redundancy is reduced.
+
+12. What is data availability?
+
+Data availability means data can be accessed by producers and consumers when required.
+
+13. What is data durability?
+
+Data durability means stored messages remain available even after failures, according to the configured guarantees.
+
+14. Can Kafka work without replication?
+
+Yes, but a topic with replication factor 1 has no replica to take over if its broker fails.
+
+15. What is the minimum number of brokers required for replication factor 2?
+
+At least two brokers are required.
+
+16. What is the purpose of replication factor 3?
+
+It maintains three copies of each partition to improve fault tolerance.
+
+17. What is the meaning of under-replicated partitions?
+
+These are partitions whose replicas are not fully synchronized with their leaders.
+
+18. What is an offline partition?
+
+An offline partition is a partition that currently has no available leader.
+
+19. What is a clean leader election?
+
+It selects a new leader from the in-sync replicas to help maintain data consistency.
+
+20. What is an unclean leader election?
+
+It allows an out-of-sync replica to become leader when no in-sync replica is available, potentially causing data loss.
+
+21. What is the purpose of a Kafka controller?
+
+The controller manages cluster coordination, broker status and partition leadership changes.
+
+22. What is broker recovery?
+
+Broker recovery is the process of bringing a failed broker back online and synchronizing its replicas.
+
+23. Does shutting down one broker always stop the entire Kafka cluster?
+
+No, the cluster may continue working if the required partition leaders and replicas remain available.
+
+24. Can multiple brokers on one machine provide complete fault tolerance?
+
+No, because failure of the physical machine can stop all brokers together.
+
+25. What is the output of this experiment?
+
+The cluster's behaviour is observed after shutting down one broker, demonstrating how replication and leader election help maintain availability
+
+
+
+
+xperiment 9: Listing Topics, Modifying Configurations and Deleting Topics
+Experiment 9
+ External Viva Preparation
+
+
+Aim: To perform Kafka administrative operations such as listing topics, modifying configurations and deleting topics.
+Viva Questions and Answers
+1. What is topic management in Kafka?
+
+Topic management means creating, listing, modifying and deleting Kafka topics.
+
+2. Which command is used to list all topics?
+
+kafka-topics.sh --list --bootstrap-server localhost:9092
+
+3. Which command is used to describe a topic?
+
+kafka-topics.sh --describe --topic mytopic --bootstrap-server localhost:9092
+
+4. Which command is used to delete a topic?
+
+kafka-topics.sh --delete --topic mytopic --bootstrap-server localhost:9092
+
+5. What is topic configuration?
+
+Topic configuration defines settings that control how messages are stored and managed in a topic.
+
+6. How do you modify a topic configuration?
+
+We use the kafka-configs.sh command with the --alter option.
+
+7. What is the purpose of the --alter option?
+
+It is used to modify the existing configuration settings of a Kafka topic or broker.
+
+8. What is retention period in Kafka?
+
+Retention period specifies how long Kafka keeps messages before making them eligible for deletion.
+
+9. What is retention.ms?
+
+retention.ms specifies the message retention time in milliseconds.
+
+10. What is retention.bytes?
+
+retention.bytes specifies the maximum log size retained for a partition.
+
+11. What is cleanup.policy?
+
+It specifies how Kafka manages old log data, commonly through deletion or compaction.
+
+12. What is log compaction?
+
+Log compaction keeps the latest value for each message key within a compacted topic.
+
+13. What is the difference between delete and compact cleanup policies?
+
+Delete removes old log segments based on retention settings, while compact retains the latest value for each key.
+
+14. Can we delete a topic while producers are running?
+
+It is possible, but active producers and consumers may encounter errors when the topic is deleted.
+
+15. What happens after deleting a topic?
+
+The topic and its stored data are removed, subject to the broker's deletion process.
+
+16. What is the purpose of kafka-configs.sh?
+
+It is a command-line tool used to view and modify Kafka configurations.
+
+17. What is the difference between --describe and --list?
+
+--list displays topic names, whereas --describe displays detailed information about a topic.
+
+18. What is a partition count?
+
+It is the total number of partitions available in a topic.
+
+19. Can we change the replication factor of an existing topic?
+
+Yes, by using partition reassignment.
+
+20. Can we change the number of partitions of an existing topic?
+
+Yes, Kafka allows increasing the partition count, but not directly decreasing it.
+
+21. What is the purpose of topic naming?
+
+Topic names help identify and organize different categories of messages.
+
+22. What is the difference between a topic and a partition?
+
+A topic is a logical category for messages, while a partition is a division of that topic.
+
+23. What happens if topic deletion is disabled?
+
+The delete command will not successfully remove the topic while the broker setting delete.topic.enable is disabled.
+
+24. Why is topic configuration important?
+
+It helps control storage, data retention, replication and message management.
+
+25. What is the output of this experiment?
+
+Kafka topics are listed, their configurations are modified and selected topics are successfully deleted.
+
+
+
+
+Experiment 10: Introduction to Kafka Connect and Integration with External Systems
+Experiment 10
+ External Viva Preparation
+
+
+Aim: To introduce Kafka Connect and demonstrate how connectors are used to integrate Kafka with external systems.
+Viva Questions and Answers
+1. What is Kafka Connect?
+
+Kafka Connect is a tool used to transfer data between Kafka and external systems such as databases and file systems.
+
+2. Why is Kafka Connect used?
+
+It simplifies data integration without requiring us to write a separate data-transfer program.
+
+3. What is a connector in Kafka?
+
+A connector is a component that moves data between Kafka and an external system.
+
+4. What are the two main types of connectors?
+
+The two main types are Source Connectors and Sink Connectors.
+
+5. What is a Source Connector?
+
+A Source Connector imports data from an external system into Kafka.
+
+6. What is a Sink Connector?
+
+A Sink Connector exports data from Kafka to an external system.
+
+7. What is the difference between Source and Sink Connectors?
+
+Source connectors bring data into Kafka, whereas sink connectors send data out of Kafka.
+
+8. Give examples of Kafka Connect integrations.
+
+Kafka can integrate with MySQL, PostgreSQL, Elasticsearch, cloud storage and file systems.
+
+9. What is a standalone mode in Kafka Connect?
+
+Standalone mode runs a Kafka Connect worker as a single process on one machine.
+
+10. What is distributed mode in Kafka Connect?
+
+Distributed mode runs multiple workers together to provide scalability and fault tolerance.
+
+11. What is a Kafka Connect worker?
+
+A worker is a process that executes connectors and manages their tasks.
+
+12. What is a task in Kafka Connect?
+
+A task is a unit of work performed by a connector to transfer data.
+
+13. What is the REST API in Kafka Connect?
+
+It allows users to manage connectors by sending HTTP requests.
+
+14. What is the default REST API port of Kafka Connect?
+
+The commonly used default REST API port is 8083.
+
+15. What is a connector configuration file?
+
+It contains settings such as connector class, source or sink details and Kafka topic information.
+
+16. What is data integration?
+
+Data integration is the process of combining or transferring data between different systems.
+
+17. What is JDBC Connector?
+
+JDBC Connector is used to transfer data between Kafka and relational databases through JDBC.
+
+18. What is the purpose of a FileStream Connector?
+
+It demonstrates reading data from a file into Kafka or writing Kafka messages to a file.
+
+19. What is scalability in Kafka Connect?
+
+Scalability means increasing workers or tasks to handle larger data-transfer workloads.
+
+20. What is fault tolerance in distributed Kafka Connect?
+
+It allows connector tasks to be reassigned to available workers when a worker fails.
+
+21. What is a connector plugin?
+
+A connector plugin is an additional component that provides integration with a particular external system.
+
+22. Does Kafka Connect require Java?
+
+Yes, Kafka Connect runs on the JVM and requires a compatible Java runtime.
+
+23. What is the advantage of Kafka Connect over manual integration?
+
+It reduces coding effort and provides reusable connectors for data integration.
+
+24. Can Kafka Connect transfer data continuously?
+
+Yes, it supports continuous data transfer between Kafka and external systems.
+
+25. What is the output of this experiment?
+
+A connector is configured and used to transfer data between Kafka and an external system.
+
+
+
+
+Experiment 11: Word Count Stream Processing Application Using Kafka Streams
+Experiment 11
+ External Viva Preparation
+
+
+Aim: To implement a simple word count stream processing application using Kafka Streams.
+Viva Questions and Answers
+1. What is Kafka Streams?
+
+Kafka Streams is a Java library used to process and analyze real-time data streams from Kafka topics.
+
+2. What is stream processing?
+
+Stream processing is the continuous processing of data as it arrives.
+
+3. What is word count in Kafka Streams?
+
+Word count is an application that counts how many times each word appears in incoming messages.
+
+4. What is the main purpose of this experiment?
+
+The purpose is to count the frequency of each word from messages received through a Kafka topic.
+
+5. What is a data stream?
+
+A data stream is a continuous flow of data records generated over time.
+
+6. Which programming language is commonly used with Kafka Streams?
+
+Java is commonly used to develop Kafka Streams applications.
+
+7. What is KStream?
+
+KStream represents an unbounded stream of individual records in Kafka Streams.
+
+8. What is KTable?
+
+KTable represents a table-like view of data that is updated whenever new records arrive.
+
+9. What is the difference between KStream and KTable?
+
+KStream represents a continuous flow of records, whereas KTable represents the latest value for each key.
+
+10. What is KStreamBuilder or StreamsBuilder?
+
+StreamsBuilder is used to define the processing logic of a Kafka Streams application.
+
+11. What is the purpose of map() in Kafka Streams?
+
+The map() operation transforms each input record into a new key-value record.
+
+12. What is flatMapValues()?
+
+It transforms each record's value into zero or more new values without changing its key.
+
+13. What is groupByKey()?
+
+It groups records based on their keys.
+
+14. What is count() in Kafka Streams?
+
+The count() operation calculates the number of records for each key.
+
+15. What is toStream()?
+
+It converts a KTable into a KStream for further stream processing.
+
+16. What is the role of an input topic?
+
+The input topic provides the messages that the word count application processes.
+
+17. What is the role of an output topic?
+
+The output topic stores the calculated word counts.
+
+18. What is a topology in Kafka Streams?
+
+A topology is a graph of processing operations that defines how data flows through a Kafka Streams application.
+
+19. What is a state store?
+
+A state store maintains information required by a stream processing application, such as word counts.
+
+20. What is real-time processing?
+
+Real-time processing means processing data continuously with very little delay.
+
+21. What is the advantage of Kafka Streams?
+
+It provides scalable, fault-tolerant and real-time stream processing using a Java library.
+
+22. What is aggregation in Kafka Streams?
+
+Aggregation combines multiple records to calculate a result, such as a total or count.
+
+23. Can Kafka Streams process data without storing it in Kafka?
+
+Kafka Streams normally reads from and writes to Kafka topics, using Kafka as its data source and destination.
+
+24. What is the output of a word count application?
+
+It displays or stores the number of occurrences of each word, such as Kafka = 3 and Java = 2.
+
+25. What is the difference between Kafka and Kafka Streams?
+
+Kafka is a distributed event streaming platform, whereas Kafka Streams is a Java library for processing data stored in Kafka.
