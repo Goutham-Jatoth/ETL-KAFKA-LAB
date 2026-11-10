@@ -1,0 +1,280 @@
+Experiment 1 – Kafka Installation
+1. What is Apache Kafka?
+
+An open-source distributed event streaming platform used to transfer and process real-time data.
+
+2. What is a broker?
+
+A Kafka server that stores messages and handles requests.
+
+3. What is a cluster?
+
+A group of one or more Kafka brokers working together.
+
+4. What is Zookeeper?
+
+A coordination service used by older Kafka architectures.
+
+5. What is KRaft?
+
+Kafka's built-in metadata management mode that does not require Zookeeper.
+Experiment 2 – Single Broker
+1. What is a topic?
+
+A logical category used to store messages.
+
+2. What is a producer?
+
+An application that sends messages to Kafka.
+
+3. What is a consumer?
+
+An application that reads messages from Kafka.
+
+4. What is an offset?
+
+A sequential position number assigned to a message within a partition.
+
+5. What is the default Kafka port?
+Experiment 3 – Multiple Brokers
+1. What is a multi-broker cluster?
+
+A Kafka cluster containing two or more brokers.
+
+2. Why use multiple brokers?
+
+To improve scalability, load distribution and fault tolerance.
+
+3. What is a broker ID?
+
+A unique identification number assigned to each broker.
+
+4. What is a leader?
+
+A replica that handles read and write requests for a partition.
+
+5. What is a follower?
+
+A replica that copies data from the leader.
+Experiment 4 – Java Producer
+1. What is KafkaProducer?
+
+A Java class used to send messages to Kafka.
+
+2. What is ProducerRecord?
+
+A class representing a message that needs to be sent.
+
+3. What is serialization?
+
+Converting data into bytes.
+
+4. What is send()?
+
+A method used to send messages to a Kafka topic.
+
+5. What is flush()?
+
+A method that ensures buffered messages are sent.
+Experiment 5 – Synchronous and Asynchronous
+1. What is synchronous sending?
+
+Sending a message and waiting for the broker's response.
+
+2. What is asynchronous sending?
+
+Sending a message without waiting immediately for the broker's response.
+
+3. Which is generally faster?
+
+Asynchronous sending.
+
+4. What is a callback?
+
+A function executed after a message-sending operation completes.
+
+5. Which method is used for synchronous sending?
+
+send().get()
+Experiment 6 – Java Consumer
+1. What is KafkaConsumer?
+
+A Java class used to read messages from Kafka.
+
+2. What is subscribe()?
+
+A method used to subscribe to Kafka topics.
+
+3. What is poll()?
+
+A method used to retrieve messages from Kafka.
+
+4. What is group.id?
+
+It identifies the consumer group.
+
+5. What is deserialization?
+
+Converting bytes back into readable data.
+Experiment 7 – Partitions and Replication
+1. What is a partition?
+
+A division of a topic used to distribute messages.
+
+2. What is replication factor?
+
+The number of copies of each partition.
+
+3. What is ISR?
+
+In-Sync Replicas, which are replicas sufficiently synchronized with the leader.
+
+4. Can replication factor be greater than broker count?
+
+No.
+
+5. What is the advantage of partitions?
+
+They improve parallel processing and scalability.
+Experiment 8 – Fault Tolerance
+1. What is fault tolerance?
+
+The ability of Kafka to continue working despite failures.
+
+2. What happens if a broker fails?
+
+Kafka can elect another available in-sync replica as the new leader.
+
+3. What is leader election?
+
+Selecting a new leader when the existing leader fails.
+
+4. What is an offline partition?
+
+A partition that has no available leader.
+
+5. Why is replication important?
+
+It improves data availability and protects against broker failures.
+Experiment 9 – Topic Management
+1. How do you list topics?
+
+Using the --list option.
+
+2. How do you delete a topic?
+
+Using the --delete option.
+
+3. What is retention period?
+
+The time for which Kafka keeps messages.
+
+4. What is log compaction?
+
+It keeps the latest value for each message key.
+
+5. What is kafka-configs.sh?
+
+A command-line tool used to manage Kafka configurations.
+Experiment 10 – Kafka Connect
+1. What is Kafka Connect?
+
+A tool used to transfer data between Kafka and external systems.
+
+2. What is a Source Connector?
+
+It brings data from external systems into Kafka.
+
+3. What is a Sink Connector?
+
+It sends data from Kafka to external systems.
+
+4. What is a worker?
+
+A process that runs connectors and their tasks.
+
+5. What is the default REST API port?
+Experiment 11 – Kafka Streams
+1. What is Kafka Streams?
+
+A Java library used for real-time stream processing.
+
+2. What is word count?
+
+Counting how many times each word appears in messages.
+
+3. What is KStream?
+
+A continuous stream of records.
+
+4. What is KTable?
+
+A table-like representation containing the latest value for each key.
+
+5. What is aggregation?
+
+Combining multiple records to calculate a result.
+Experiment 12 – Kafka with Hadoop
+1. What is Hadoop?
+
+An open-source framework for distributed storage and processing of big data.
+
+2. What is HDFS?
+
+Hadoop Distributed File System, used to store large files across multiple machines.
+
+3. What is MapReduce?
+
+A programming model used for parallel processing of large datasets.
+
+4. What is YARN?
+
+A Hadoop resource management and scheduling system.
+
+5. What is Kafka's role in Hadoop?
+
+Kafka collects real-time data and transfers it to Hadoop for storage and processing.
+
+
+
+
+
+Part 3: Important Kafka Commands
+These are very important if the external asks you to explain the commands.
+Operation	Command
+Create topic	--create
+List topics	--list
+Describe topic	--describe
+Delete topic	--delete
+Modify configuration	kafka-configs.sh --alter
+View configuration	kafka-configs.sh --describe
+
+
+
+Important Differences
+These are common comparison questions in external examinations.
+
+1. Producer vs Consumer
+Producer	Consumer
+Sends messages	Reads messages
+Writes data	Reads data
+
+2. Synchronous vs Asynchronous
+Synchronous	Asynchronous
+Waits for response	Doesn't wait immediately
+Generally slower	Generally faster
+send().get()	send() with callback
+
+3. Kafka vs Hadoop
+Kafka	Hadoop
+Real-time streaming	Big data storage and processing
+Topics and partitions	HDFS and MapReduce
+
+4. Source vs Sink Connector
+Source	Sink
+External system → Kafka	Kafka → External system
+
+5. KStream vs KTable
+KStream	KTable
+Continuous records	Latest value for each key
+Event stream	Table-like representation
